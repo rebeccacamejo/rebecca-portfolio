@@ -12,7 +12,7 @@ hey! this is my personal corner on the web where I share my writing, ideas, and 
 - **markdown**: for writing content in a simple and easy-to-read format
 - **typescript**: for type-checking and better code quality 
 - **biome**: Format, lint, and more in a fraction of a second.
-- **cloudflare pages**: for hosting the site and continuous deployment
+- **vercel**: for hosting the site and continuous deployment
 
 ## 🎨 design
 - KISS (keep it simple, stupid) 
