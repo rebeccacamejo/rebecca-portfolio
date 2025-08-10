@@ -1,21 +1,16 @@
-import { defineConfig } from "astro/config";
-import mdx from "@astrojs/mdx";
-import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
-import cloudflare from "@astrojs/cloudflare";
+import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
+import mdx from '@astrojs/mdx';
+import vercel from '@astrojs/vercel/serverless'; // v7 uses serverless adapter
 
-// https://astro.build/config
 export default defineConfig({
-	site: "https://www.sanju.sh",
-	integrations: [
-		mdx(),
-		sitemap({
-			changefreq: "daily",
-			priority: 1,
-			lastmod: new Date().toISOString().split("T")[0],
-		}),
-		tailwind(),
-	],
-	output: "server",
-	adapter: cloudflare(),
+  site: 'https://rebeccacamejo.com', // Replace with your domain
+  output: 'server',
+  integrations: [
+    tailwind(),
+    sitemap(),
+    mdx(),
+  ],
+  adapter: vercel(),
 });
