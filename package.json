@@ -13,7 +13,7 @@
 		"format": "biome format --write ."
 	},
 	"dependencies": {
-		"16": "^0.0.2",
+		"18": "^0.0.0",
 		"@astrojs/check": "^0.5.7",
 		"@astrojs/mdx": "^2.3.1",
 		"@astrojs/rss": "^4.0.5",
