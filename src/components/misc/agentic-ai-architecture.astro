@@ -1,0 +1,89 @@
+---
+---
+<div class="max-w-6xl mx-auto p-8 bg-white dark:bg-slate-900 rounded-2xl shadow-md">
+  <h3 class="text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-12 text-center">
+    Agentic AI Architecture
+  </h3>
+
+  <!-- Row 1: Customer → Router -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 mb-12">
+    <!-- Customer Message -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md p-6 w-80 text-center">
+      <div class="text-sm text-slate-500 dark:text-slate-300 mb-1">Entry</div>
+      <div class="font-semibold text-lg text-slate-800 dark:text-slate-100">Customer Message</div>
+    </div>
+
+    <!-- Curved Arrow -->
+    <svg class="hidden md:block w-36 h-20" viewBox="0 0 140 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cubic Bézier: start (10,30) → control1 (60,10) → control2 (80,50) → end (130,30) -->
+      <path d="M10 30 C 60 10, 80 50, 130 30" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+      <path d="M120 20 L130 30 L120 40" fill="#0ea5e9"/>
+    </svg>
+
+    <!-- Router Agent (Extra wide) -->
+    <div class="bg-emerald-50 dark:bg-slate-800 rounded-2xl border border-emerald-200 dark:border-slate-700 shadow-md p-6 w-[28rem] max-w-full text-center">
+      <div class="text-sm text-emerald-600 dark:text-emerald-300 mb-1">Router</div>
+      <div class="font-semibold text-lg text-slate-800 dark:text-slate-100 mb-2">Router Agent</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400 mb-4">Classifies intent → Chooses specialist</div>
+      <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+        <span>Decision</span>
+        <span class="font-medium text-slate-700 dark:text-slate-200">Fraud • Billing • Support</span>
+      </div>
+      <div class="h-1 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Router → Specialists -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 mb-12">
+    <!-- Curved Arrow -->
+    <svg class="hidden md:block w-36 h-20" viewBox="0 0 140 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 30 C 60 10, 80 50, 130 30" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+      <path d="M120 20 L130 30 L120 40" fill="#0ea5e9"/>
+    </svg>
+
+    <!-- Specialist Agent(s) -->
+    <div class="bg-violet-50 dark:bg-slate-800 rounded-2xl border border-violet-200 dark:border-slate-700 shadow-md p-6 w-80 text-center">
+      <div class="text-sm text-violet-600 dark:text-violet-300 mb-1">Specialists</div>
+      <div class="font-semibold text-lg text-slate-800 dark:text-slate-100 mb-2">Specialist Agent(s)</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400 mb-4">Tool calls, DB queries, rules engine</div>
+      <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+        <span>Tool Calls</span>
+        <span>APIs • DB • Rules</span>
+      </div>
+      <div class="h-1 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Specialists → Human Review → Final Response -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-10">
+    <!-- Human Review -->
+    <div class="bg-amber-50 dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-amber-700 shadow-md p-6 w-80 text-center">
+      <div class="text-sm text-amber-600 dark:text-amber-300 mb-1">Review</div>
+      <div class="font-semibold text-lg text-slate-800 dark:text-slate-100 mb-2">Human Review (if needed)</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Compliance • Escalation • Quality</div>
+    </div>
+
+    <!-- Curved Arrow -->
+    <svg class="hidden md:block w-36 h-20" viewBox="0 0 140 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 30 C 60 10, 80 50, 130 30" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+      <path d="M120 20 L130 30 L120 40" fill="#0ea5e9"/>
+    </svg>
+
+    <!-- Final Response -->
+    <div class="bg-sky-50 dark:bg-slate-800 rounded-2xl border border-sky-200 dark:border-sky-700 shadow-md p-6 w-80 text-center">
+      <div class="text-sm text-sky-600 dark:text-sky-300 mb-1">Output</div>
+      <div class="font-semibold text-lg text-slate-800 dark:text-slate-100 mb-2">Final Response to Customer</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Logged • Audited • Sent</div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="mt-12 max-w-xl mx-auto text-sm text-slate-500 dark:text-slate-400">
+    <p class="mb-2 font-semibold text-center">Notes:</p>
+    <ul class="list-disc ml-5 space-y-2">
+      <li>Log every prompt, tool call, and output for observability and debugging.</li>
+      <li>Use rules engine for compliance checks and fallback responses.</li>
+      <li>Keep human-in/on-the-loop for high-risk decisioning.</li>
+    </ul>
+  </div>
+</div>

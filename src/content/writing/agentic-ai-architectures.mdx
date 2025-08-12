@@ -1,0 +1,109 @@
+---
+title: "My Journey Into Agentic AI"
+description: "If you’re building your own agentic AI:
+Don’t start with “cool” — start with “reliable.”
+Workflows are your friends. Agents are a privilege.
+Choose frameworks you understand inside-out.
+Always have a plan for when things go wrong."
+pubDate: '2025-08-11'
+---
+
+## **My Journey Into Agentic AI**
+
+Two weeks ago, I got handed one of those projects that makes you both excited and slightly terrified:
+
+> We need an AI system that can talk to customers, solve problems, and follow strict rules… but also adapt in real time.
+
+Basically, an **agentic AI** — something smarter than a fixed script, but safer than an AI free-for-all.
+
+So I did what I do: I binged read every resource I could find.
+
+- [LangChain’s guide on agent frameworks](https://blog.langchain.com/how-to-think-about-agent-frameworks/)
+- [Anthropic’s post on building effective agents](https://www.anthropic.com/engineering/building-effective-agents?ref=blog.langchain.com)
+- [LangGraph’s agentic concepts](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/)
+- …and a **monster spreadsheet** comparing all the major frameworks.
+
+Here’s what stuck with me — and how it’s shaping the architecture we’re building.
+
+---
+
+### **Act 1: Agents vs. Workflows**
+
+The first thing I learned is that not all “agent” talk means the same thing.
+
+- **Workflows** = Pre-written recipes.  
+  Think: “Step 1, clean input. Step 2, call API. Step 3, send response.” Predictable. Repeatable. No surprises.
+
+- **Agents** = Improvisers.  
+  They decide the steps, choose tools, and adapt as they go. Amazing for complex tasks… risky if you don’t set boundaries.
+
+💡 *Lesson learned* -- Start with workflows. Only upgrade to agents when you have a problem that actually needs flexibility.
+
+---
+
+### **Act 2: The Simplicity Trap**
+
+When you’re first building, it’s tempting to make the system “as smart as possible” from day one.  
+But Anthropic’s advice was blunt:
+
+> *Most problems don’t need an agent.*
+
+A single prompt or a small chain might be enough — and way easier to test. Complexity should be earned, not assumed.
+
+---
+
+### **Act 3: Reliability is the Boss Battle**
+
+The *real* challenge isn’t getting an agent to do something.  
+It’s making sure it:
+
+- Has the right context
+- Uses the right tool (and passes the right parameters to it)
+- Doesn’t hallucinate
+- Fails *gracefully* when things go wrong
+
+That means: **control what goes into the model at every step**. If the inputs are messy, the outputs will be too.
+
+---
+
+### **Act 4: Frameworks — Friend or Foe?**
+
+Frameworks like **LangGraph** are incredible because they:
+
+- Handle orchestration, retries, memory
+- Let you combine declarative graphs with imperative code
+- Support multi-agent systems and human-in-the-loop flows
+
+But abstraction can hide dangerous details. You still need to know what’s happening under the hood.  
+
+That's why I dove head first into CrewAI, LangGraph, Motia, MCP, etc. — to understand what is really going on from just one LLM call to chaining to routing to a ton of other patterns out there.
+
+---
+
+### **Act 5: Patterns I’m Keeping in My Toolbox**
+
+- **Routing**: Send requests to the right “specialist” agent.
+- **ReAct loops**: Reason → Act → Reason again.
+- **Reflection**: Let the agent review its own work before sending it out.
+- **Human-on-the-loop**: Autonomy most of the time, but with the ability for a person to jump in when it matters.
+
+---
+
+### **Act 6: My Hot Take**
+
+In heavily regulated spaces, you can't have fully agentic architectures. We will always need humans on — and even in — the loop in some cases.
+
+So, I think you should opt for a blend.
+
+Here’s where all of this lands for us:
+
+import AgenticArchitectureDiagram from "@components/misc/agentic-ai-architecture.astro";
+
+<AgenticArchitectureDiagram />
+
+### And the key design rules
+
+- **Simplest thing first** — start deterministic, add autonomy later.  
+- **Framework + visibility** — LangGraph for orchestration, but with logging for every prompt, tool call, and output.  
+- **Safety nets everywhere** — human review, retries, fallback responses.  
+- **Compliance built-in** — every step checked against our rules engine.  
