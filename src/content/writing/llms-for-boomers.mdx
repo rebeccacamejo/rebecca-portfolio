@@ -1,0 +1,109 @@
+---
+title: "LLMs for Boomers - Part 1"
+description: "If you don't know anything about large language models and you're curious what's under 
+the hood of chatGPT, this is for you."
+pubDate: '2025-08-24'
+---
+
+# LLMs for Boomers: From Words to Tokens
+
+### "When I was a kid..."
+Back then, in 2020, I first dipped my toes into machine learning. But I wasn’t working with today’s sleek, ChatGPT-like models. Back then, **BERT** and its cousins were the shiny new thing. They were impressive for their time, but also clunky in ways that only hindsight makes clear. Models struggled with longer context, they ran into constant “out-of-vocabulary” problems (if the tokenizer had never seen *blockchain*, it didn’t know what to do), and training them required more data than most of us had lying around.  
+
+What fixed many of those pain points? **Algorithms got smarter, datasets got bigger, and compute caught up.** Techniques like *subword tokenization* and *attention over long contexts* made models more flexible. Over time, this opened the door for large language models (LLMs) like GPT that can handle basically any text you throw at them.  
+
+---
+
+## Why start with tokens?
+At the heart of every LLM is a simple fact: **computers don’t understand words; they understand numbers.** Before any model can learn patterns in language, text has to be **broken into tokens** and mapped to **IDs** (numbers).  
+
+Think of it like teaching a child to read:  
+- At first, you break down sentences into letters and words.  
+- Then you assign each letter a place in the alphabet.  
+- Finally, you make meaning from the sequence.  
+
+LLMs do something very similar, but they don’t use an alphabet—they use a **vocabulary of tokens**.  
+
+---
+
+## Step 1: Tokenization
+**Tokenization** is just a fancy word for “chopping up text.”  
+
+- A *naïve way* is splitting on spaces. That gives you words, but also problems. For example:  
+  - `"Hello,"` vs `"Hello"` → two different tokens, even though they mean the same thing.  
+- A *better way* is **regex tokenization**, where you explicitly separate punctuation, words, and symbols.  
+- The *modern solution* is **subword tokenization** (like GPT-2 uses). This splits words into smaller, reusable chunks.  
+  - Example: *unbelievable* → `["un", "believ", "able"]`.  
+  - This way, the model never gets stuck on words it hasn’t seen before.  
+
+👉 **Key takeaway:** Tokenization ensures any text can be broken into manageable pieces the model knows how to handle.  
+
+---
+
+## Step 2: From tokens to IDs
+Once text is split into tokens, each token gets assigned a **unique number (ID)**.  
+- `"the"` might be `5`, `"dog"` might be `317`, and so on.  
+- This is called a **vocabulary**: the lookup table that maps tokens ↔ IDs.  
+
+The model doesn’t see `"dog"`. It sees `[5, 317, 92]`. Later, these IDs are turned into **embeddings**—vectors the model actually learns from.  
+
+---
+
+## Step 3: Making training samples
+Now that we have IDs, we need to build **training examples**. LLMs learn by predicting the **next token** in a sequence.  
+
+Imagine our text:  
+
+```json
+the quick brown fox jumps
+```
+
+- **Input (x):** `[the, quick, brown, fox]`  
+- **Target (y):** `[quick, brown, fox, jumps]`  
+
+The model sees `x` and tries to predict `y`. This simple shift is how GPT models learn to write, reason, and even code.  
+
+---
+
+## Step 4: Context length (T)
+Models can’t look at infinite text at once—they have a **context window**.  
+
+- If `T=8`, the model only sees 8 tokens at a time.  
+- More tokens = better understanding of context, but also more memory and compute.  
+- Attention cost grows roughly like T². Double T, and the compute goes up 4×.  
+
+👉 That’s why context length is such a big deal when comparing models (“This one handles 128k tokens!”).  
+
+---
+
+## Step 5: Stride
+When preparing data, we slide a window across the token stream. **Stride** is how far we move the window each time.  
+
+- Small stride (e.g., 1) → lots of overlap, many training examples, but more redundancy.  
+- Large stride (e.g., 64) → fewer, more unique examples.  
+
+Stride is like setting the pace in a marching band—tight steps give more rhythm, big steps cover more ground.  
+
+---
+
+## Why this all matters
+Everything in this chapter (and this post) is about **feeding the model the right kind of data**:  
+- Text → tokens → IDs → (x, y) pairs → ready for embeddings.  
+
+Along the way, you solved real-world problems (punctuation, OOV words, batching). Without this foundation, the Transformer architecture in Chapter 3 wouldn’t have anything to chew on.  
+
+---
+
+## Final Thoughts
+Looking back, the early BERT days taught us that **data preparation is half the battle**. You can’t train a good model if your inputs are messy or incomplete. That’s why Chapter 2 of `Build a Large Language Model (From Scratch)` from Sebastian Raschka is all about tokenization and batching—it’s the invisible plumbing that makes LLMs possible.  
+
+In the next post (*LLMs for Boomers, Part 2*), we’ll finally step into the model itself and see how embeddings and attention layers take these token IDs and turn them into language understanding.  
+
+---
+
+✅ **You now know:**  
+- What tokens and vocabularies are.  
+- Why subword tokenization (BPE) solved a major problem.  
+- How context length and stride shape training data.  
+- How (x, y) shifting sets up the prediction task.  
+
