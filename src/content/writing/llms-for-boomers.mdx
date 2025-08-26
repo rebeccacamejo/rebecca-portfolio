@@ -1,18 +1,43 @@
 ---
-title: "LLMs for Boomers - Part 1"
-description: "If you don't know anything about large language models and you're curious what's under 
-the hood of chatGPT, this is for you."
+title: "LLMs for Boomers - Pt. 1"
+description: "If you don't know anything about large language models, all you need to know is transformers were invented by Google, words are now tokens, 
+data preparation is half the battle, and context is everything. Keep reading if you want to know what made ChatGPT possible."
 pubDate: '2025-08-24'
 ---
 
-# LLMs for Boomers: From Words to Tokens
+## "When I was a kid..."
+...in summer of 2020, I had my first software engineering internship. I was tasked to use an LLM to try to predict events from Twitter data. 
 
-### "When I was a kid..."
-Back then, in 2020, I first dipped my toes into machine learning. But I wasn’t working with today’s sleek, ChatGPT-like models. Back then, **BERT** and its cousins were the shiny new thing. They were impressive for their time, but also clunky in ways that only hindsight makes clear. Models struggled with longer context, they ran into constant “out-of-vocabulary” problems (if the tokenizer had never seen *blockchain*, it didn’t know what to do), and training them required more data than most of us had lying around.  
+I hadn't taken my courses yet in ML/AI, so I opened up google and searched, "LLMs for dummies." This is what I found out...
 
-What fixed many of those pain points? **Algorithms got smarter, datasets got bigger, and compute caught up.** Techniques like *subword tokenization* and *attention over long contexts* made models more flexible. Over time, this opened the door for large language models (LLMs) like GPT that can handle basically any text you throw at them.  
+## The Road to LLMs: BERT and GPT
+- In **2013**, Google researchers invented "*word embeddings*." Suddenly, computers could understand relationships between words, like “Paris is to France what Rome is to Italy.”  
+- In **2017**, another Google team published *“Attention Is All You Need.”* This paper introduced the **Transformer**, a model architecture that used *self-attention* to read entire sentences at once instead of word by word.  
+  - Example: In *“I love rocks because they are so cool,”* the Transformer can figure out that *“they”* refers to *rocks*.  
+
+That breakthrough changed everything. And that was the paper I read Day 1 of my internship. 
+
+In **2018**, two landmark models had appeared, both built on the Transformer:  
+- **BERT (Google)** – An *encoder* that learned by filling in missing words (like Mad Libs). Great at *understanding* text, not at writing it.  
+- **GPT (OpenAI)** – A *decoder* that learned by predicting the **next word**. This small design choice made it a writer, not just a reader.  
+
+They were born the same year, from the same Transformer “parent,” but trained with different goals. BERT became the master of *understanding*; GPT, with scale and compute, became the master of *generation*.  
 
 ---
+
+### Why GPT Surprised Everyone
+At the time, most experts thought BERT was the future. After all, it was already powering Google Search. GPT, by contrast, looked like “just autocomplete.” But when OpenAI scaled it up — more data, more compute, bigger context windows — it didn’t just parrot words back. It could **write essays, answer questions, even hold conversations**.  
+
+To summarize:  
+The Transformer unlocked the door in 2017.  
+BERT and GPT walked through it together in 2018 — but in different directions.  
+One became the master of *understanding*; the other, with scale and compute, became the master of *generation*.  
+
+At this point you must be thinking, how do computers read words in the first place?
+
+---
+
+## From Words to Tokens
 
 ## Why start with tokens?
 At the heart of every LLM is a simple fact: **computers don’t understand words; they understand numbers.** Before any model can learn patterns in language, text has to be **broken into tokens** and mapped to **IDs** (numbers).  
@@ -72,7 +97,10 @@ Models can’t look at infinite text at once—they have a **context window**.
 - More tokens = better understanding of context, but also more memory and compute.  
 - Attention cost grows roughly like T². Double T, and the compute goes up 4×.  
 
-👉 That’s why context length is such a big deal when comparing models (“This one handles 128k tokens!”).  
+👉 That’s why context length is such a big deal when comparing models. 
+
+💡 Fun Fact: ChatGPT pro version currently has a 128k token context size.
+And at the time of writing this, Gemini Pro version has a context window of 1 million tokens... which means it can process up to 1,500 pages of text or 30K lines of code simultaneously.
 
 ---
 
@@ -90,20 +118,21 @@ Stride is like setting the pace in a marching band—tight steps give more rhyth
 Everything in this chapter (and this post) is about **feeding the model the right kind of data**:  
 - Text → tokens → IDs → (x, y) pairs → ready for embeddings.  
 
-Along the way, you solved real-world problems (punctuation, OOV words, batching). Without this foundation, the Transformer architecture in Chapter 3 wouldn’t have anything to chew on.  
+Along the way, we solved real-world problems (punctuation, OOV words, batching). Without this foundation, the Transformer architecture behind these models wouldn’t have anything to chew on.  
 
 ---
 
 ## Final Thoughts
-Looking back, the early BERT days taught us that **data preparation is half the battle**. You can’t train a good model if your inputs are messy or incomplete. That’s why Chapter 2 of `Build a Large Language Model (From Scratch)` from Sebastian Raschka is all about tokenization and batching—it’s the invisible plumbing that makes LLMs possible.  
+Looking back, the early LLM days taught us that **data preparation is half the battle**. You can’t train a good model if your inputs are messy or incomplete. That’s why Chapter 2 of `Build a Large Language Model (From Scratch)` from Sebastian Raschka is all about tokenization and batching—it’s the invisible plumbing that makes LLMs possible.  
 
-In the next post (*LLMs for Boomers, Part 2*), we’ll finally step into the model itself and see how embeddings and attention layers take these token IDs and turn them into language understanding.  
+In the next post (*LLMs for Boomers, Part 2*), we’ll finally step into the model itself and see how embeddings and attention layers take these token IDs and turn them into language understanding through word embeddings.  
 
 ---
 
 ✅ **You now know:**  
+- Who BERT and GPT really are :) 
 - What tokens and vocabularies are.  
-- Why subword tokenization (BPE) solved a major problem.  
+- Why subword tokenization (WordPiece & BPE) solved a major problem.  
 - How context length and stride shape training data.  
 - How (x, y) shifting sets up the prediction task.  
 
