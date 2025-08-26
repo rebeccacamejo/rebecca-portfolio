@@ -4,7 +4,7 @@ description: "Always tinkering."
 pubDate: 'Sept 1 2024'
 ---
 
-I work for [American Express](https://thisux.com), specifically in the Dispute & Fraud domain. 
+I work for [American Express](https://americanexpress.com), specifically in the Dispute & Fraud domain. 
 
 Obsessive problem solver, reader and writer. Always tinkering.
 
