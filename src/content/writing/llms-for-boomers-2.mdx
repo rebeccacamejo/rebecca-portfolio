@@ -1,0 +1,119 @@
+---
+title: "LLMs for Boomers - Pt. 2"
+description: "Attention is the secret sauce for LLMs to actually understand relationships between words in a long input sequence and stay coherent."
+pubDate: '2025-08-31'
+---
+
+## Are you paying attention? 
+
+If you’ve ever been in a conversation and realized halfway through that you have no idea what the other person just said… 
+congratulations, you now understand what a language model without attention feels like.
+
+Luckily, modern AI doesn’t just zone out like we do. It has a built-in trick called attention—the very thing that separates today’s smart models from the clunky ones of yesterday.
+
+In the last post, we learned how text gets broken down into **tokens**—numbers a computer can work with. That was step one.  
+
+But numbers alone don’t explain how a model can understand sentences, keep track of context, or decide what word comes next. The missing piece is **attention**.  
+
+---
+
+## Why Attention Matters  
+
+Think about conversations.
+
+- A **bad listener** is the person at dinner who nods politely while scrolling their phone, only catching a random word here or there. They don’t really track the flow of what’s being said.
+- A **good listener** actually follows your story, picks up the important details, and asks the right follow-up questions.
+
+LLMs without attention are like the first person. They notice words, but they don’t know which ones matter. With attention, they become the second person—able to weigh words, focus on the right ones, and respond meaningfully.
+
+Take this sentence:  
+> The dog chased the ball because *it* was red.
+
+What does *“it”* refer to—the dog, or the ball?  
+
+You figured it out instantly. Your brain knew which word mattered more in that context. That’s attention.  
+
+Computers don’t naturally know how to do this. If every word was treated equally and it was a bad listener, the sentence could come out like this:  
+> The red was chased because it dog the ball.” 
+
+Which… makes no sense.   
+
+---
+
+## The Big Idea of Attention  
+
+Attention gives each word a chance to **look at all the other words** in the sentence and decide: *“How important are you to me right now?”*  
+
+- High importance = focus on this word.  
+- Low importance = mostly ignore it.  
+
+This scoring system is what lets the model figure out that *“it”* connects to *“ball”* and not *“dog.”*  
+
+---
+
+## Q, K, and V — The Three Roles  
+
+In the book `Build a Large Language Model (From Scratch)` from Sebastian Raschka, attention is explained using three mathematical roles: **Query (Q)**, **Key (K)**, and **Value (V)**. 
+
+This is the part where LLMs contain a ton of mathy stuff (statistics, probability, vectors, matrices). Absolutely beautiful stuff. 
+
+But here’s the simpler way to think about it:  
+
+- **Query (Q):** What am I looking for?  
+- **Key (K):** What do I have to offer to others?  
+- **Value (V):** What information do I carry if someone needs me?  
+
+Let’s use our sentence again:
+
+> The dog chased the ball because it was red.
+
+- The word “it” becomes a Query: “Who can explain who I am referring to?”
+- The word “dog” is a Key: “I’m here, maybe it’s me.”
+- The word “ball” is also a Key: “I’m here, maybe it’s me.”
+- The model compares them and decides the ball’s Key matches best, because the ball’s Value includes “red” (and that fits the sentence).
+
+Result: “it” = ball.
+
+That’s the entire trick: Queries search, Keys answer, Values provide the details.
+
+---
+
+## Self-Attention: Everyone Checks Everyone  
+
+This process doesn’t just happen once. Every word checks on every other word in the sentence. They all take a turn as a Query, checking all the other words' Key and borrowing their Value if needed. That’s why it’s called **self-attention**.  
+
+It’s like a good group conversation where everyone listens to everyone else, not just waiting for their turn to talk.
+
+---
+
+## Multi-Head Attention: Multiple Angles  
+
+One round of attention might miss something. That’s why models use **multi-head attention**—multiple sets of attention running in parallel.  
+
+- One head might track who the subject is (*dog*).  
+- Another might track descriptive details (*red* = adjective for ball).  
+- Another might track connections (*it* = ball).  
+
+By combining multiple perspectives, the model doesn’t just “hear” the sentence — it understands it from different angles, like a really good listener picking up tone, emphasis, and context all at once.
+
+---
+
+## Why This Changed Everything  
+
+Before attention, older models read text in strict order, word by word. They often “forgot” the beginning by the time they reached the end—like someone telling a long story who loses the point halfway through.
+
+Attention fixed that. It allows the model to look at the *entire sentence or paragraph at once*, weigh the relationships, and keep the context intact. That’s why modern LLMs can stay coherent even in long conversations.   
+
+---
+
+## Wrapping It Up  
+
+Attention is the breakthrough that made modern LLMs possible. Without it, models would stumble through text without truly understanding the connections.  
+
+With it, they can figure out what matters, what to ignore, and how words relate to each other—even across long sentences or paragraphs.  
+
+So the next time an AI writes something that feels surprisingly human, remember: it’s not guessing blindly. It’s paying attention.  
+
+---
+
+👀 **Next up (Chapter 4):** We’ll look at the *Transformer architecture*—the full design that puts attention to work at scale.  
