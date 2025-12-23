@@ -6,17 +6,14 @@ ship_count: 1
 pubDate: 'Dec 15 2025'
 ---
 
-I wanted to better understand how JVM-based serverless platforms work under the hood—especially the trade-offs around performance, concurrency, startup behavior, and isolation.
+To better understand how JVM-based serverless platforms work—especially the trade-offs around performance, concurrency, and isolation—I built a small Function-as-a-Service (FaaS) platform from scratch. The goal wasn’t production-ready software, but a concrete mental model of how modern FaaS runtimes are designed and why constraints exist.
 
-Rather than relying only on documentation, I built a small Function-as-a-Service (FaaS) platform from scratch. The goal wasn’t to create a production-ready system, but to develop a concrete mental model for how modern FaaS runtimes—particularly JVM-based ones—are designed and why their constraints exist.
-
-The result is **NanoFaaS**: a minimal, local FaaS that supports Python and Java functions, container-based execution, and in-process JVM execution using Vert.x.
-
+The result is **NanoFaaS**: a minimal, local FaaS supporting Python and Java functions, container-based execution, and in-process JVM execution using Vert.x.
 ---
 
 ## Overview
 
-NanoFaaS is intentionally small, but complete end-to-end:
+NanoFaaS is intentionally small but complete:
 
 - Function deployment via HTTP APIs  
 - Synchronous and asynchronous invocation  
@@ -33,13 +30,13 @@ NanoFaaS is intentionally small, but complete end-to-end:
 - Java  
 - Vert.x (HTTP routing, classloading, and in-process execution)  
 
-Everything runs locally using Docker Compose to make experimentation easy and repeatable.
+Everything runs locally using Docker Compose for easy experimentation.
 
 ---
 
 ## Execution Models
 
-While building NanoFaaS, I explored several common FaaS runtime approaches:
+Common FaaS runtime approaches explored while building NanoFaaS:
 
 | Model | Description | Characteristics |
 |------|------------|----------------|
@@ -47,7 +44,7 @@ While building NanoFaaS, I explored several common FaaS runtime approaches:
 | Worker Pods + Queues | Long-lived workers pull jobs from a queue | Faster warm starts, simpler scaling |
 | In-Process JVM (Vert.x) | Multiple functions share a JVM | Near-zero cold start, shared failure domain |
 
-NanoFaaS implements the first model and a simplified version of the third. The JVM runtime makes the trade-off especially visible: container-per-invocation is simple, but poorly suited to JVM startup characteristics.
+NanoFaaS implements the first model and a simplified version of the third. The JVM runtime highlights why container-per-invocation is simple but inefficient for JVM workloads.
 
 ---
 
@@ -66,7 +63,7 @@ Each deployed **verticle instance**:
 - Never migrates between threads  
 - Executes all callbacks on the same context  
 
-This model produces highly predictable latency and throughput—but only when blocking operations are avoided. Violating that contract has immediate and visible consequences.
+This produces predictable latency and throughput—but only if blocking operations are avoided.
 
 ---
 
