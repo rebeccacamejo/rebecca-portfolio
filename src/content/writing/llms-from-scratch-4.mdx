@@ -1,0 +1,136 @@
+---
+title: "LLMs from Scratch - Pt. 4"
+description: "We’ve built the pieces. 
+Now we explain how the model *learns* — by predicting what comes next, measuring how wrong it is, and slowly adjusting itself over millions of examples."
+pubDate: '2025-10-15'
+---
+
+## Architecture Isn’t Learning
+
+In the earlier parts of this series, we covered:
+- How text becomes tokens
+- How attention works
+- How Transformer blocks are structured
+
+That gives us a *machine*.
+
+But a machine doesn’t learn just because it exists.
+
+Learning only happens when the model:
+1. Sees examples
+2. Makes predictions
+3. Gets feedback
+4. Adjusts
+5. Repeats
+
+---
+
+## Step 1: Tokens Become Vectors
+
+The model doesn’t work directly with token IDs like `42` or `317`.
+
+Each token is first mapped to a **vector** — a long list of numbers.  
+This vector is the model’s internal representation of that token.
+
+At the start:
+- All vectors are random
+- Nothing has meaning yet
+
+As training progresses:
+- Tokens used in similar situations move closer together
+- Tokens used differently move farther apart
+
+This is how the model begins to form a sense of meaning — without being taught definitions.
+
+---
+
+## Step 2: The Only Thing the Model Learns to Do
+
+Despite all the complexity, the training objective is simple:
+
+> **Given some text, predict the next token.**
+
+That’s it.
+
+Not:
+- “Understand language”
+- “Be intelligent”
+- “Answer questions”
+
+Just:
+> *What comes next?*
+
+If the model sees:
+
+> “I drink coffee every”
+
+It learns that:
+- “morning” is more likely than
+- “elephant”
+
+Over millions of examples, these small improvements compound.
+
+---
+
+## Step 3: Measuring Mistakes
+
+After each prediction, the model checks:
+
+- Did I give high probability to the correct next token?
+- Or did I guess poorly?
+
+This difference becomes a **loss score**:
+- Low loss → good prediction
+- High loss → bad prediction
+
+Training exists to **reduce this loss over time**.
+
+---
+
+## Step 4: Adjusting the Model
+
+Once the loss is calculated, the model slightly updates its internal numbers:
+- Attention weights change
+- Feed-forward layers adjust
+- Token vectors shift
+
+Each update is tiny.
+
+But after millions of updates, clear patterns emerge.
+
+This is why training takes time — and why data quality matters so much.
+
+---
+
+## Step 5: Learning in Batches
+
+To train efficiently, the model learns from many examples at once.
+
+This is called **batching**.
+
+Instead of updating from one sentence:
+- The model processes many sequences in parallel
+- Updates are averaged
+- Learning becomes more stable
+
+This is invisible to users, but critical to performance.
+
+---
+
+## What Training Produces
+
+After enough training:
+- Token vectors encode meaning
+- Attention heads specialize in patterns
+- The model becomes good at continuing text realistically
+
+It hasn’t memorized language.
+It has learned **statistical structure**.
+
+---
+
+## Closing
+
+Training is where structure turns into ability.
+
+In the next part, we’ll look at how a trained model becomes useful in the real world — and what its limits are.

@@ -1,0 +1,105 @@
+---
+title: "LLMs from Scratch - Pt. 5"
+description: "A trained language model is powerful, but not automatically helpful. 
+This final post explains how models are adapted for real tasks, how they’re evaluated, and where their limits are."
+pubDate: '2025-11-05'
+---
+
+## A Trained Model Is Still Generic
+
+After training, a language model is good at predicting text.
+
+But that doesn’t mean it:
+- Answers questions the way you expect
+- Follows instructions
+- Uses the right tone
+- Stays focused on a task
+
+To make it useful, we usually add another step.
+
+---
+
+## Fine-Tuning: Teaching the Model a Job
+
+**Fine-tuning** means continuing training on a smaller, more specific dataset.
+
+Examples:
+- Question → answer pairs
+- Support conversations
+- Domain-specific documents
+
+The model already understands language.
+Fine-tuning nudges it toward a particular behavior.
+
+Think of it like:
+- Learning English
+- Then learning how to write emails
+- Then learning how to write *professional* emails
+
+---
+
+## Instruction Training
+
+Some fine-tuning focuses on teaching the model to follow instructions.
+
+Instead of raw text, the model sees examples like:
+- Prompt: “Explain this simply”
+- Response: a clear explanation
+
+This is how models learn to:
+- Be helpful
+- Be concise
+- Match human expectations
+
+It’s still prediction — just applied to instruction patterns.
+
+---
+
+## How We Know If a Model Is Good
+
+Models are evaluated differently depending on the task:
+- Can it predict unseen text well?
+- Does it answer correctly?
+- Does it stay consistent?
+
+Automatic metrics help, but human evaluation is still important — especially for quality and safety.
+
+---
+
+## Training vs Using the Model
+
+Once deployed, the model stops learning.
+
+At that point:
+- It only runs **forward**
+- It doesn’t update its weights
+- It predicts one token at a time
+
+This phase is called **inference**.
+
+Everything users experience — speed, cost, context length — comes from inference, not training.
+
+---
+
+## Important Limitations
+
+Even very large models:
+- Don’t truly “understand” content
+- Can sound confident while being wrong
+- Reflect patterns and biases in their data
+
+They are tools — not sources of truth.
+
+Understanding their limits is part of using them responsibly.
+
+---
+
+## Final Wrap-Up
+
+Across this series, we’ve followed the full path:
+
+**Text → Tokens → Attention → Transformers → Training → Fine-Tuning → Use**
+
+Once you understand the basics, the mystery fades.
+
+What’s left is a powerful system — built on simple ideas, scaled carefully, and used best with clarity and intention.
