@@ -1,5 +1,5 @@
 ---
-title: "LLMs for Boomers - Pt. 1"
+title: "How I built an LLM from scratch"
 description: "If you don't know anything about large language models, all you need to know is transformers were invented by Google, words are now tokens, 
 data preparation is half the battle, and context is everything. Keep reading if you want to know what made ChatGPT possible."
 pubDate: '2025-08-24'
@@ -27,8 +27,6 @@ They were born the same year, from the same Transformer “parent,” but traine
 
 ### Why GPT Surprised Everyone
 At the time, most experts thought BERT was the future. After all, it was already powering Google Search. GPT, by contrast, looked like “just autocomplete.” But when OpenAI scaled it up — more data, more compute, bigger context windows — it didn’t just parrot words back. It could **write essays, answer questions, even hold conversations**. 
-
-**Why this matters beyond the engineering**: it reminds us that creativity isn’t purely human invention. We’re uncovering structures that God planted in language, logic, pattern. GPT’s surprise is a small glimpse into the order God built into the world and into our minds.
 
 To summarize:  
 The Transformer unlocked the door in 2017.  
@@ -66,7 +64,7 @@ LLMs do something very similar, but they don’t use an alphabet—they use a **
   - Example: *unbelievable* → `["un", "believ", "able"]`.  
   - This way, the model never gets stuck on words it hasn’t seen before.  
 
-👉 **Key takeaway:** Tokenization ensures any text can be broken into manageable pieces the model knows how to handle.  
+ **Key takeaway:** Tokenization ensures any text can be broken into manageable pieces the model knows how to handle.  
 
 ---
 
@@ -102,7 +100,7 @@ Models can’t look at infinite text at once—they have a **context window**.
 - More tokens = better understanding of context, but also more memory and compute.  
 - Attention cost grows roughly like T². Double T, and the compute goes up 4×.  
 
-👉 That’s why context length is such a big deal when comparing models. 
+ That’s why context length is such a big deal when comparing models. 
 
 💡 Fun Fact: ChatGPT pro version currently has a 128k token context size.
 And at the time of writing this, Gemini Pro version has a context window of 1 million tokens... which means it can process up to 1,500 pages of text or 30K lines of code simultaneously.
@@ -133,14 +131,6 @@ Along the way, we solved real-world problems (punctuation, OOV words, batching).
 - Why subword tokenization (WordPiece & BPE) solved a major problem.  
 - How context length and stride shape training data.  
 - How (x, y) shifting sets up the prediction task.  
-
-**But more importantly**, you see how much of what makes LLMs powerful is structure, order, and relationship — things God designed us to notice. 
-
-When we understand these ideas, we see not just what AI can do, but why it should lead us toward humility, gratitude, and wisdom, instead of towards greed or fear. 
-
-The fact that human engineers can map tokens and build predictions is possible only because God made a world with patterns that can be mapped. Our creativity is real, but it’s also reflective of our Creator. 
-
-This brilliance is a gift — coming from the same One who spoke galaxies into being and formed our minds so we could explore them.
 
 ---
 
