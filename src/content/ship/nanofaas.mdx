@@ -1,0 +1,289 @@
+---
+title: NanoFaaS – Get to Know Serverless (Under the Hood)
+description: I built a minimal FaaS to understand JVM serverless runtimes, execution models, and platform trade-offs.
+category: 'learning'
+ship_count: 1
+pubDate: 'Dec 15 2025'
+---
+
+I wanted to better understand how JVM-based serverless platforms work under the hood—especially the trade-offs around performance, concurrency, startup behavior, and isolation.
+
+Rather than relying only on documentation, I built a small Function-as-a-Service (FaaS) platform from scratch. The goal wasn’t to create a production-ready system, but to develop a concrete mental model for how modern FaaS runtimes—particularly JVM-based ones—are designed and why their constraints exist.
+
+The result is **NanoFaaS**: a minimal, local FaaS that supports Python and Java functions, container-based execution, and in-process JVM execution using Vert.x.
+
+---
+
+## Overview
+
+NanoFaaS is intentionally small, but complete end-to-end:
+
+- Function deployment via HTTP APIs  
+- Synchronous and asynchronous invocation  
+- Runtime-specific execution strategies  
+- Metadata-driven routing  
+- Asynchronous job queues  
+- In-process execution for JVM functions  
+
+### Stack
+
+- FastAPI (control plane and API gateway)  
+- Redis (function metadata, job queues, results)  
+- Docker (ephemeral runtime isolation)  
+- Java  
+- Vert.x (HTTP routing, classloading, and in-process execution)  
+
+Everything runs locally using Docker Compose to make experimentation easy and repeatable.
+
+---
+
+## Execution Models
+
+While building NanoFaaS, I explored several common FaaS runtime approaches:
+
+| Model | Description | Characteristics |
+|------|------------|----------------|
+| Container-per-Invocation | Each request runs in a fresh container | Strong isolation, high startup cost |
+| Worker Pods + Queues | Long-lived workers pull jobs from a queue | Faster warm starts, simpler scaling |
+| In-Process JVM (Vert.x) | Multiple functions share a JVM | Near-zero cold start, shared failure domain |
+
+NanoFaaS implements the first model and a simplified version of the third. The JVM runtime makes the trade-off especially visible: container-per-invocation is simple, but poorly suited to JVM startup characteristics.
+
+---
+
+## In-Process JVM Execution with Vert.x
+
+Vert.x uses a non-blocking, event-driven execution model built around **event loops**:
+
+- Each event loop is a single JVM thread  
+- Callbacks scheduled on an event loop execute sequentially  
+- Multiple event loops exist per JVM (typically proportional to CPU cores)  
+- Blocking work must be explicitly offloaded to worker threads  
+
+Each deployed **verticle instance**:
+
+- Is bound to exactly one event loop  
+- Never migrates between threads  
+- Executes all callbacks on the same context  
+
+This model produces highly predictable latency and throughput—but only when blocking operations are avoided. Violating that contract has immediate and visible consequences.
+
+---
+
+## Function Packing and Classloading
+
+In NanoFaaS, JVM functions are packaged as Vert.x verticles:
+
+- Each function extends `AbstractVerticle`  
+- Function JARs are loaded dynamically using custom classloaders  
+- Metadata describes the function name, address, runtime, and entry point  
+- On deployment, the control plane loads the JAR and deploys the verticle  
+- Each function registers an event bus consumer at a unique address  
+
+Invocation is handled by sending a message to that address. Execution happens **in-process**, on the event loop assigned to that verticle instance.
+
+This is function packing: many functions running inside a single JVM, sharing memory, threads, and networking resources.
+
+The performance benefits are significant. The failure domain is shared.
+
+---
+
+## Execution Flow: From Request to Function
+
+Building NanoFaaS made the execution flow concrete:
+
+1. An API gateway receives a request  
+2. The gateway looks up function metadata in Redis  
+3. Metadata determines:
+   - Runtime type  
+   - Invocation mode (sync vs async)  
+   - Execution target (container vs JVM runtime)  
+4. The request is routed to the appropriate executor  
+5. For JVM functions:
+   - If the function is not yet loaded, its JAR is classloaded  
+   - The verticle is deployed into the Vert.x runtime  
+   - The function becomes addressable on the event bus  
+6. Invocation sends a message to the function’s address  
+
+This clarified that JVM “cold starts” are often dominated by **classloading and initialization**, not just container startup.
+
+---
+
+## Scaling in Practice: What Actually Scales
+
+One of the most important realizations was what actually scales in a JVM-based FaaS system:
+
+- Individual functions do not scale independently  
+- **Vert.x pods / JVM runtimes** are the unit of scaling  
+- Each pod hosts many functions via function packing  
+
+Horizontal scaling happens at the pod level. Within a pod:
+
+- Event loops limit concurrency  
+- Worker pools limit blocking throughput  
+- Memory is shared across all functions  
+
+This explains why production platforms enforce per-function limits even when functions execute in-process.
+
+---
+
+## Communication Boundaries
+
+NanoFaaS made communication boundaries explicit:
+
+- **In-memory calls**  
+  - Fastest  
+  - Only possible within the same JVM and classloader  
+
+- **Event bus messages**  
+  - In-process and asynchronous  
+  - Ideal for communication between functions inside the same Vert.x runtime  
+
+- **HTTP / WebClient calls**  
+  - Required when crossing JVM or Kubernetes pod boundaries  
+  - Higher latency but necessary for isolation and scaling  
+
+Which mechanism is used depends entirely on *where the function lives*.
+
+---
+
+## Why an API Gateway Is Necessary
+
+The API gateway is not just a convenience layer:
+
+- Centralizes routing logic  
+- Decouples clients from execution topology  
+- Enables cross-runtime invocation  
+- Handles authentication, throttling, and retries  
+
+Without a gateway, functions would need to understand too much about where other functions live and how they are executed.
+
+---
+
+## Failure Domains and Platform Constraints
+
+Building the system made these trade-offs unavoidable:
+
+- Blocking an event loop stalls all functions on that loop  
+- Exhausting worker threads impacts all blocking work  
+- Memory pressure affects the entire JVM  
+- Pod-level failures take out all co-located functions  
+
+These realities explain why real serverless platforms enforce:
+
+- Execution timeouts  
+- Non-blocking execution guidance  
+- Memory limits  
+- Backpressure mechanisms  
+
+These constraints exist to keep shared systems stable.
+
+---
+
+## What I Learned About Containers and Kubernetes
+
+Beyond serverless runtime design, NanoFaaS significantly deepened my understanding of **Docker, containerization, and Kubernetes as execution primitives**.
+
+### Docker and Containerization
+
+Implementing container-per-invocation execution provided hands-on experience with:
+
+- Building minimal runtime images for different languages  
+- Understanding image size vs startup latency trade-offs  
+- Managing container lifecycles (create, execute, tear down)  
+- Passing configuration and payloads safely into containers  
+- Observing filesystem, networking, and process isolation  
+
+Running functions in containers made it clear that containers provide **process isolation**, not full isolation, and that dependency-heavy images amplify cold start costs.
+
+---
+
+### Kubernetes as the Scaling Unit
+
+NanoFaaS clarified how Kubernetes fits into a serverless platform:
+
+- Vert.x runs inside a pod  
+- Pods are the unit of horizontal scaling  
+- Each pod hosts many functions  
+- Kubernetes schedules pods, not individual functions  
+
+This explains:
+
+- Why noisy neighbors exist  
+- Why per-function limits are enforced  
+- Why autoscaling decisions are runtime-level concerns  
+
+---
+
+### Metadata as the Control Plane Backbone
+
+Building the control plane highlighted the importance of metadata:
+
+- Function identity  
+- Runtime and execution model  
+- Deployment state  
+- Routing address  
+
+All execution decisions are driven by metadata rather than hardcoded logic. Redis became the system of record that allowed the gateway and runtimes to remain loosely coupled.
+
+---
+
+### Cold Starts Are Layered
+
+NanoFaaS revealed that cold starts consist of multiple layers:
+
+- Container startup  
+- JVM startup  
+- Classloading  
+- Framework initialization  
+- Function initialization  
+
+Optimizing only one layer does not eliminate latency if others remain expensive.
+
+---
+
+## What I Learned
+
+- Container-per-invocation is simple but inefficient for JVM workloads  
+- Function packing dramatically improves throughput  
+- Event loops trade flexibility for predictability  
+- Scaling happens at the runtime (pod) level, not per function  
+- Communication costs define system boundaries  
+- Isolation in serverless systems is always partial  
+
+Most of the complexity in a FaaS platform lives *outside* the function code itself.
+
+---
+
+## Why I Built This Internally
+
+I built NanoFaaS internally as a learning tool, not just for myself but so others in my company could reason about the platform more easily.
+
+I intentionally made it reproducible:
+
+- A simple project plan that evolves step-by-step  
+- Clear documentation explaining how each part works  
+- Example function folders for each runtime  
+
+The idea was to let someone start from zero, run the system locally, and see how design decisions affect behavior.
+
+---
+
+## Helping Engineers Write Better Functions
+
+One outcome of this project was helping function authors understand *why* certain practices matter:
+
+- Why blocking the event loop is dangerous  
+- Why large, synchronous, dependency-heavy functions cause problems  
+- Why non-blocking I/O is strongly encouraged  
+- Why function size and startup behavior matter  
+
+Seeing these issues appear naturally in a small system makes platform constraints feel intentional rather than arbitrary.
+
+---
+
+## Closing Thoughts
+
+NanoFaaS is not intended to be production software. It’s a learning project that made the design of JVM-based serverless platforms concrete and understandable.
+
+Building the system revealed why these platforms look the way they do—and why their constraints exist—in a way documentation alone never could.
