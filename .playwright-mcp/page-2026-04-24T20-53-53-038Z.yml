@@ -1,0 +1,92 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "rebecca" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "writings" [ref=e7] [cursor=pointer]:
+          - /url: /writings
+        - link "thoughts" [ref=e8] [cursor=pointer]:
+          - /url: /thoughts
+        - link "prayers" [ref=e9] [cursor=pointer]:
+          - /url: /prayers
+        - link "ships" [ref=e10] [cursor=pointer]:
+          - /url: /ships
+      - button "Toggle theme" [ref=e11] [cursor=pointer]:
+        - img [ref=e12]
+    - article [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]:
+          - time [ref=e17]: Jun 27, 2025
+        - heading "on formation" [level=1] [ref=e18]
+        - paragraph [ref=e19]: a prayer about not conforming to the world
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: We are always being formed. The question is—by what?
+        - paragraph [ref=e22]: This world moves faster than our souls were meant to go. It rushes us. Numbs us. Overwhelms us with information.
+        - paragraph [ref=e23]: And what we let into our minds begins to shape our hearts— What we love, What we fear, What we become.
+        - paragraph [ref=e24]: "But Romans 12:2 says: “Do not conform to the pattern of this world, but be transformed by the renewing of your mind.”"
+        - paragraph [ref=e25]: "This is the invitation: Not to try harder. But to be transformed."
+        - paragraph [ref=e26]: We are not just forgiven— We are formed into the life of Christ. We live by His rhythms. We think with His mind. We love with His heart.
+        - paragraph [ref=e27]: "And if you are still unsure— Still caught in the tension between the world and Jesus… He is not shouting tonight. He is whispering: “I love you. Come home.” Not with shame, but with mercy. Because it is never too late. Because He is enough. And He is all that you will ever need."
+        - paragraph [ref=e28]: ⸻
+        - paragraph [ref=e29]: God, we live in a storm of influence. It comes fast. It comes loud. And it comes quietly—dressed as good.
+        - paragraph [ref=e30]: It speaks through friendships that erode conviction in the name of keeping peace. Through wealth that promises control, but builds lives too proud to need You and hearts too anxious to trust You.
+        - paragraph [ref=e31]: We’ve let too many voices shape us. We wake up reaching for our phones before we reach for You. We fall asleep to screens still glowing, our minds too tired to pray.
+        - paragraph [ref=e32]: We chase updates, opinions, trends— but neglect the truth that restores our souls.
+        - paragraph [ref=e33]: "So we confess: We’ve been discipled by distraction. Trained to crave attention instead of truth. We’re more aware of the noise around us than the still, steady whisper of Your Spirit."
+        - paragraph [ref=e34]: We’ve followed what feels urgent and ignored what’s eternal. We’ve chosen what’s easy over what is holy.
+        - paragraph [ref=e35]: What is our confidence made of? The praise of people—so quick to fade? The opinions of strangers on a screen? Gold and silver—shiny but empty promises?
+        - paragraph [ref=e36]: Have we anchored our peace to what can break? To people who falter just like we do? To platforms built on sand?
+        - paragraph [ref=e37]: We’ve lived at a hurried pace— Working without rest. Building without prayer. Performing without abiding.
+        - paragraph [ref=e38]: We’ve baptized burnout as obedience. We’ve called compromise wisdom. We’ve given You what’s left— from lives stretched too thin.
+        - paragraph [ref=e39]: And still, we wonder why we feel empty. Why we’re still thirsty. Still restless.
+        - paragraph [ref=e40]: But tonight, we pause. We bring the noise, the weariness, the striving— and we lay it down.
+        - paragraph [ref=e41]: We don’t want quick relief. We want to be made whole. To be quiet enough to hear You again. Still enough to be known.
+        - paragraph [ref=e42]: So search us, God. Reveal what’s misaligned. Uncover what’s hidden. And begin Your transforming work in us.
+        - paragraph [ref=e43]: Revive our minds— not just to know truth, but to be shaped by it. Minds that choose stillness over speed, silence over noise, obedience over opinion.
+        - paragraph [ref=e44]: "Take captive the thoughts that have ruled us, and make them obedient to Christ:"
+        - paragraph [ref=e45]: • The thought that we are what we produce… when You say we are sons and daughters.
+        - paragraph [ref=e46]: • The lie that our worth depends on approval… when You call us accepted in the Beloved.
+        - paragraph [ref=e47]: • The fear that we’re behind… when Your timing is perfect.
+        - paragraph [ref=e48]: • The whisper that says “you’ll never change”… when You say, “Behold, I make all things new.”
+        - paragraph [ref=e49]: • The voice that says “you’re too broken”… when You say, “My grace is sufficient.”
+        - paragraph [ref=e50]: • The pressure that says “you must hold it all together”… when You say, “Cast your cares upon Me.”
+        - paragraph [ref=e51]: Interrupt these patterns. Tear down every idol. Cleanse every motive. Renew every desire.
+        - paragraph [ref=e52]: "Make us people who don’t just hear truth— but are formed by it. We echo Paul: “I no longer live, but Christ lives in me.”"
+        - paragraph [ref=e53]: Reorder our lives around Your presence. Teach us to think with Your mind, to love with Your heart, to live by Your Spirit.
+        - paragraph [ref=e54]: Señor, aquí estoy. Aquí estamos. Con el alma inquieta, pero con los ojos fijos en Ti.
+        - paragraph [ref=e55]: Hemos sido moldeados por mil voces— y casi ninguna ha venido de Ti.
+        - paragraph [ref=e56]: Nos hemos llenado de conocimiento, pero no de sabiduría. Hemos buscado afirmación, pero no transformación. Nos hemos movido con la corriente del mundo, sin preguntarte si Tú estabas en la barca.
+        - paragraph [ref=e57]: Perdónanos, Dios. Por vivir sin margen, por correr sin dirección, por consumir sin discernimiento. Por elegir lo urgente en lugar de lo eterno. Por llamar “normal” a lo que está roto.
+        - paragraph [ref=e58]: Llenamos nuestros días de ruido, nuestros calendarios de prisa, y nuestros corazones de planes sin oración. Y dejamos poco espacio para Ti.
+        - paragraph [ref=e59]: Tú, que eres santo… Majestuoso en gloria, perfecto en justicia, y lleno de misericordia.
+        - paragraph [ref=e60]: Miramos a Jesús— el que no pecó, pero se hizo pecado por nosotros. El que no vino a ser servido, sino a servir y dar Su vida como rescate. El que no solo nos perdona— sino que nos forma, nos limpia, nos llama.
+        - paragraph [ref=e61]: Y en medio de todo lo que este mundo ofrece… Jesús, Tú sigues siendo suficiente. Aun cuando lo olvidamos, Tú no cambias. Tú eres el regalo. Tú eres el descanso. Tú eres el camino de regreso a casa.
+        - paragraph [ref=e62]: "Como dijo Isaías: “En el arrepentimiento y la calma está su salvación, en la serenidad y la confianza está su fuerza…”"
+        - paragraph [ref=e63]: Y aún así, nos resistimos.
+        - paragraph [ref=e64]: Pero hoy, rendimos la resistencia. Hoy venimos cansados… pero decididos a confiar. A volver a Ti. A descansar en Ti. Porque no hay fuerza más grande que la que viene de estar en Tu presencia. No hay salvación más real que la de rendirse por completo a Tu amor.
+        - paragraph [ref=e65]: ¿A dónde más iríamos, Señor? Sólo Tú tienes palabras de vida. Sólo Tú puedes llenar lo que el mundo no puede tocar. Sólo Tú puedes sanar lo que nadie más ve.
+        - paragraph [ref=e66]: Porque cada palabra que Tú hablas me despierta con ternura de mi sueño profundo, y vuelvo a la vida. Vuelvo a respirar. Vuelvo a sentir Tu presencia.
+        - paragraph [ref=e67]: Quita el orgullo que nos impide rendirnos. Limpia el temor que nos impide confiar. Rompe los hábitos que nos alejan de Tu presencia.
+        - paragraph [ref=e68]: Haznos sensibles otra vez. Haznos quietos otra vez. Haznos tuyos otra vez.
+        - paragraph [ref=e69]: "Queremos tu mente, Jesús. Tu corazón tierno. Tu fe obediente. Tu vida sencilla, anclada en lo que verdaderamente importa: Tu verdad, Tu presencia, Tu gracia."
+        - paragraph [ref=e70]: Rendimos cada pensamiento errante, cada deseo mal formado, cada imagen falsa que llevamos dentro.
+        - paragraph [ref=e71]: Eres mi amado. Mi creador. Mi Padre. Te amo más que a mi vida.
+        - paragraph [ref=e72]: Eres nuestro todo. Vuelve a darnos forma, Señor. Y que esta vez, llevemos la imagen de Cristo.
+        - paragraph [ref=e73]: En tu nombre oramos, Amén.
+        - generic [ref=e74] [cursor=pointer]:
+          - img [ref=e75]
+          - img [ref=e78]
+  - generic [ref=e82]:
+    - button "Menu" [ref=e83]:
+      - img [ref=e85]
+      - generic: Menu
+    - button "Inspect" [ref=e89]:
+      - img [ref=e91]
+      - generic: Inspect
+    - button "Audit" [ref=e93]:
+      - img [ref=e95]
+      - generic: Audit
+    - button "Settings" [ref=e98]:
+      - img [ref=e100]
+      - generic: Settings

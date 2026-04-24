@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Header } from '@components/misc';
+import FormattedDate from '@components/misc/formatted-date.astro';
+import { BaseHead } from '@components/seo';
+import RootLayout from '@layouts/root-layout.astro';
+import { clsx } from '@utils/index';
+
+type Props = CollectionEntry<'prayer'>['data'];
+
+const { title, description, pubDate } = Astro.props;
+---
+
+<html lang='en'>
+	<head>
+		<BaseHead
+			title={title}
+			description={description || 'a prayer'}
+			image='/images/ogimage.png'
+		/>
+	</head>
+
+	<body class='grid-notebook min-h-screen bg-white dark:bg-black'>
+		<RootLayout>
+			<div
+				id='navbar+title'
+				class='flex flex-col w-full gap-6 max-w-xl'>
+				<Header />
+
+				<article class='w-full flex flex-col gap-6'>
+					<div class='flex flex-col gap-1'>
+						<p class='text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest'>
+							<FormattedDate date={pubDate.toString()} />
+						</p>
+						<h1 class='w-full text-4xl md:text-5xl font-medium tracking-tight'>
+							{title}
+						</h1>
+						{description && (
+							<p class='text-gray-500 dark:text-gray-400 font-medium text-lg mt-1'>
+								{description}
+							</p>
+						)}
+					</div>
+
+					<div
+						class={clsx(
+							'w-full',
+							'prose prose-lg max-w-none dark:prose-invert',
+							'prose-p:font-medium prose-p:leading-relaxed',
+							'prose-h1:font-medium prose-h2:font-medium',
+							'prose-h1:tracking-tight prose-h2:tracking-tight',
+						)}>
+						<slot />
+					</div>
+				</article>
+			</div>
+		</RootLayout>
+	</body>
+</html>

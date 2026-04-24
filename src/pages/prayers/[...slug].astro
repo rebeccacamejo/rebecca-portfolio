@@ -1,0 +1,20 @@
+---
+import PrayerLayout from '@layouts/prayer-layout.astro';
+import { type CollectionEntry, getCollection } from 'astro:content';
+import { ScrollProgress } from '@components/misc';
+
+const prayers = await getCollection('prayer');
+type Props = CollectionEntry<'prayer'>;
+
+const { slug } = Astro.params;
+const prayer = prayers.find((p) => p.slug === slug);
+
+if (!prayer) return Astro.redirect('/404');
+
+const { Content } = await prayer.render();
+---
+
+<PrayerLayout {...prayer.data}>
+	<Content />
+	<ScrollProgress />
+</PrayerLayout>

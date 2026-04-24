@@ -1,0 +1,104 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "rebecca" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "writings" [ref=e7] [cursor=pointer]:
+          - /url: /writings
+        - link "thoughts" [ref=e8] [cursor=pointer]:
+          - /url: /thoughts
+        - link "prayers" [ref=e9] [cursor=pointer]:
+          - /url: /prayers
+        - link "ships" [ref=e10] [cursor=pointer]:
+          - /url: /ships
+      - button "Toggle theme" [ref=e11] [cursor=pointer]:
+        - img [ref=e12]
+    - article [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]:
+          - time [ref=e17]: Oct 2, 2025
+        - heading "on the blood" [level=1] [ref=e18]
+        - paragraph [ref=e19]: a prayer about the blood He shed for us all
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Tonight, we are talking about remembering Jesus.
+        - paragraph [ref=e22]: His life, his death and resurrection, his body.
+        - paragraph [ref=e23]: But now, I want to talk about his blood.
+        - paragraph [ref=e24]: Have you ever thought about your own blood?
+        - paragraph [ref=e25]: It flows quietly beneath your skin—over sixty thousand miles of vessels—carrying life to every part of you.
+        - paragraph [ref=e26]: "The Word tells us in Leviticus: “The life of the flesh is in the blood.”"
+        - paragraph [ref=e27]: That’s not just poetry. That’s how God designed us.
+        - paragraph [ref=e28]: And that is why, from the very beginning, blood was required when people sinned.
+        - paragraph [ref=e29]: In the Old Testament, when an Israelite sinned, they would bring an innocent animal to the altar.
+        - paragraph [ref=e30]: They laid their hands on its head, confessing guilt.
+        - paragraph [ref=e31]: Then its innocent life was taken in their place.
+        - paragraph [ref=e32]: Its blood poured out at the base of the altar.
+        - paragraph [ref=e33]: And once a year, on the Day of Atonement, the high priest would wash himself, put on sacred garments, and enter the Holy of Holies with blood.
+        - paragraph [ref=e34]: He sprinkled it on the mercy seat—first for his own sin, then for the sins of the people.
+        - paragraph [ref=e35]: That blood meant substitution—an innocent life for the guilty.
+        - paragraph [ref=e36]: It meant cleansing—washing away impurity so the people could stand before a holy God.
+        - paragraph [ref=e37]: But it wasn’t enough.
+        - paragraph [ref=e38]: The altar ran red day after day, year after year.
+        - paragraph [ref=e39]: The blood of animals could cover sin for a time, but it could never cleanse the heart forever.
+        - paragraph [ref=e40]: All of it was a shadow.
+        - paragraph [ref=e41]: All of it was pointing forward.
+        - paragraph [ref=e42]: To Jesus. The spotless Lamb of God. Who shed His blood once and for all.
+        - paragraph [ref=e43]: "The writer of Hebrews reminds us: “Without the shedding of blood there is no forgiveness.”"
+        - paragraph [ref=e44]: But then he says, “Christ entered once for all into the holy places… by means of His own blood, thus securing an eternal redemption.”
+        - paragraph [ref=e45]: This was not a sacrifice repeated year after year.
+        - paragraph [ref=e46]: This was not a priest who had to cleanse himself before cleansing the people.
+        - paragraph [ref=e47]: This was the Son of God. Holy. Blameless. Perfect.
+        - paragraph [ref=e48]: He became both the priest and the sacrifice.
+        - paragraph [ref=e49]: He carried His own blood—not the blood of bulls or goats—into the true Holy of Holies in heaven.
+        - paragraph [ref=e50]: And with one act, He made a way that never closes.
+        - paragraph [ref=e51]: So when we speak of the blood of Jesus, we’re not just speaking of what flowed down the cross.
+        - paragraph [ref=e52]: We’re speaking of the cosmic power of His blood—blood that reconciles all things in heaven and on earth and still cleanses hearts today.
+        - paragraph [ref=e53]: And it’s no coincidence that on the night He was betrayed, Jesus took the cup in His hands. He knew His blood would soon be poured out.
+        - paragraph [ref=e54]: Think about that—they held in their hands the symbol of a sacrifice that had not yet happened, but was already secured in His heart.
+        - paragraph [ref=e55]: And He didn’t just say to look at it. He said to drink it. To take it in.
+        - paragraph [ref=e56]: Because His life was meant to become our life.
+        - paragraph [ref=e57]: So tonight, as we prepare to pray, we remember that cup—and the blood that makes us His own.
+        - paragraph [ref=e58]: Let’s pray.
+        - paragraph [ref=e59]: Dear Jesus,
+        - paragraph [ref=e60]: "Thank you because:"
+        - paragraph [ref=e61]: Your blood cleanses where no ritual, no effort of ours ever could.
+        - paragraph [ref=e62]: Your blood silences every accusation that rises up against us.
+        - paragraph [ref=e63]: Your blood means forgiveness—full, final, forever.
+        - paragraph [ref=e64]: Your blood tore the veil and opened access to the Father.
+        - paragraph [ref=e65]: Our blood whispers of sin and death…
+        - paragraph [ref=e66]: But Yours cries out louder with mercy, grace, and eternal life.
+        - paragraph [ref=e67]: Like a river, it washes over us—cleansing impurities we cannot even see.
+        - paragraph [ref=e68]: You knew us before the foundation of the world.
+        - paragraph [ref=e69]: You formed our bodies with great purpose—to carry our souls and Your Spirit.
+        - paragraph [ref=e70]: I pray we never grow numb to the wonder of Your creation… or the cost of our redemption.
+        - paragraph [ref=e71]: "I pray that every drop of Your blood would say to us tonight: You are Mine."
+        - paragraph [ref=e72]: We were bought at a high price—not with silver or gold, as Peter wrote, but with Your precious blood, the blood of the spotless Lamb.
+        - paragraph [ref=e73]: Lord, help us see that this new covenant, this cup, is more than a symbol—it is the reminder that Your life flows within us, cleansing and sustaining us forever.
+        - paragraph [ref=e74]: Gracias Señor.
+        - paragraph [ref=e75]: Porque tu sangre corre más profunda que nuestra culpa, Señor.
+        - paragraph [ref=e76]: Tu sangre limpia las manchas que nadie ve.
+        - paragraph [ref=e77]: Tu sangre abrió el cielo para que nosotros podamos entrar.
+        - paragraph [ref=e78]: "Tu sangre nos dice: ya no somos esclavos. Yo mismo pagué por ustedes."
+        - paragraph [ref=e79]: Gracias Señor porque siendo aún pecadores, Tú moriste por nosotros.
+        - paragraph [ref=e80]: Cada mancha en la cruz se convirtió en pureza sobre nosotros.
+        - paragraph [ref=e81]: Derramaste de tu amor.
+        - paragraph [ref=e82]: Deseo que mi corazón siempre tiemble con gratitud. No solo esta noche… pero cada día.
+        - paragraph [ref=e83]: "Y juntos recordamos, declaramos, y creemos:"
+        - paragraph [ref=e84]: más que nuestras obras, más que nuestros esfuerzos, más que nuestras lágrimas— Tu sangre es suficiente.
+        - paragraph [ref=e85]: En tu nombre oramos, Amén.
+        - generic [ref=e86] [cursor=pointer]:
+          - img [ref=e87]
+          - img [ref=e90]
+  - generic [ref=e94]:
+    - button "Menu" [ref=e95]:
+      - img [ref=e97]
+      - generic: Menu
+    - button "Inspect" [ref=e101]:
+      - img [ref=e103]
+      - generic: Inspect
+    - button "Audit" [ref=e105]:
+      - img [ref=e107]
+      - generic: Audit
+    - button "Settings" [ref=e110]:
+      - img [ref=e112]
+      - generic: Settings

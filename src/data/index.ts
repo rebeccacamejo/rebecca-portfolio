@@ -20,6 +20,10 @@ export const menuItems: MenuItem[] = [
 		url: "/thoughts",
 	},
 	{
+		label: "prayers",
+		url: "/prayers",
+	},
+	{
 		label: "ships",
 		url: "/ships",
 	},

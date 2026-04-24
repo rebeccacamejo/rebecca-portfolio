@@ -12,6 +12,18 @@
     @apply bg-white text-black dark:bg-black dark:text-white;
   }
 
+  .grid-notebook {
+    background-image:
+      repeating-linear-gradient(transparent, transparent 27px, rgba(0, 0, 0, 0.08) 27px, rgba(0, 0, 0, 0.08) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(0, 0, 0, 0.08) 27px, rgba(0, 0, 0, 0.08) 28px);
+  }
+
+  .dark .grid-notebook {
+    background-image:
+      repeating-linear-gradient(transparent, transparent 27px, rgba(255, 255, 255, 0.12) 27px, rgba(255, 255, 255, 0.12) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(255, 255, 255, 0.12) 27px, rgba(255, 255, 255, 0.12) 28px);
+  }
+
 
   @font-face {
     font-family: 'UncutSans';

@@ -1,0 +1,55 @@
+---
+import FormattedDate from '@components/misc/formatted-date.astro';
+import { Header } from '@components/misc';
+import { BaseHead } from '@components/seo';
+import { SITE_TITLE } from '@data/index';
+import { getCollection } from 'astro:content';
+import RootLayout from '@layouts/root-layout.astro';
+
+const prayers = (await getCollection('prayer')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang='en'>
+	<head>
+		<BaseHead
+			title={`prayers · ${SITE_TITLE}`}
+			description='a journal of conversations with God'
+			image='/images/ogimage.png'
+		/>
+	</head>
+	<body class='grid-notebook min-h-screen bg-white dark:bg-black'>
+		<RootLayout>
+			<div
+				id='navbar+title'
+				class='flex flex-col w-full gap-6 max-w-xl'>
+				<Header />
+				<h1 class='w-full text-7xl font-medium tracking-tight'>prayers</h1>
+
+				<div class='flex flex-col w-full divide-y divide-gray-200 dark:divide-gray-800'>
+					{
+						prayers.map((prayer) => (
+							<a
+								href={`/prayers/${prayer.slug}`}
+								class='block py-6 group hover:opacity-60 transition-opacity duration-150'>
+								<p class='text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2'>
+									<FormattedDate date={prayer.data.pubDate.toString()} />
+								</p>
+								<h2 class='text-xl font-medium text-black dark:text-white'>
+									{prayer.data.title}
+								</h2>
+								{prayer.data.description && (
+									<p class='text-gray-500 dark:text-gray-400 font-medium text-base mt-1'>
+										{prayer.data.description}
+									</p>
+								)}
+							</a>
+						))
+					}
+				</div>
+			</div>
+		</RootLayout>
+	</body>
+</html>

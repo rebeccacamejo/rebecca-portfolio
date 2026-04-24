@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "rebecca" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "writings" [ref=e7] [cursor=pointer]:
+          - /url: /writings
+        - link "thoughts" [ref=e8] [cursor=pointer]:
+          - /url: /thoughts
+        - link "prayers" [ref=e9] [cursor=pointer]:
+          - /url: /prayers
+        - link "ships" [ref=e10] [cursor=pointer]:
+          - /url: /ships
+      - button "Toggle theme" [ref=e11] [cursor=pointer]:
+        - img [ref=e12]
+    - article [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]:
+          - time [ref=e17]: Apr 8, 2026
+        - heading "on desires" [level=1] [ref=e18]
+        - paragraph [ref=e19]: a prayer about broken cisterns
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Heavenly Father,
+        - paragraph [ref=e22]: There are things we want so badly we’re afraid to pray about them honestly. Because we don’t know what would hurt more— if You said no… or if You said nothing at all.
+        - paragraph [ref=e23]: So we’ve learned how to keep certain desires just below the surface.
+        - paragraph [ref=e24]: And yet— we can’t escape what’s inside us. Some desires don’t leave. Such deep longings that we’ve dug our own wells to satisfy. And it’s exhausting.
+        - paragraph [ref=e25]: Your Word says in Jeremiah that the heart is deceitful above all things and desperately sick—who can understand it? Because we don’t always know which desires are from You and which ones we’ve built ourselves.
+        - paragraph [ref=e26]: But Lord tonight we bring it all to You. You know what we carry. You haven’t forgotten. And in Your hands, You shape every desire. So we come honestly.
+        - paragraph [ref=e27]: We bring the thing we keep circling back to— the future we’ve been quietly rehearsing. We confess that we have tried to force what only You can give. We called anxiety ambition and tried to pass it off as faith. Forgive us.
+        - paragraph [ref=e28]: We say we trust You— and then live like we’re on our own. And still—You are good.
+        - paragraph [ref=e29]: Teach us the kind of trust that doesn’t need control to feel safe.
+        - paragraph [ref=e30]: We release our desires to you. Not because they don’t matter. But because You matter more.
+        - paragraph [ref=e31]: We release the timeline. We release the version of the story we’ve been holding onto.
+        - paragraph [ref=e32]: "Right now—teach us to open our hands. We say: We trust You."
+        - paragraph [ref=e33]: ⸻
+        - paragraph [ref=e34]: "And as we open our hands— remind us of what was always true:"
+        - paragraph [ref=e35]: You are not indifferent to our desire. You desire.
+        - paragraph [ref=e36]: Before we ever wanted You— You wanted us.
+        - paragraph [ref=e37]: You did not choose us because we were ready. You chose us before we even knew you. You said it Yourself— we did not choose You. You chose us.
+        - paragraph [ref=e38]: And when we wandered— You did not wait at a distance. You came after us. Like a shepherd leaving ninety-nine. Like a father who saw his child while he was still far off— and ran.
+        - paragraph [ref=e39]: "You have spoken tenderly to us in the wilderness. You called us by name. You said: you are Mine. You said: you are precious in My eyes. You are honored. I love you."
+        - paragraph [ref=e40]: You have stood at the door and knocked. Not once—and walked away. But patiently. Persistently. Because You desperately wanted to come in.
+        - paragraph [ref=e41]: You have searched us and known us. You have hemmed us in, behind and before. You rejoice over us with gladness. You quiet us with Your love. You exult over us with singing.
+        - paragraph [ref=e42]: And nothing— nothing in death or life, in present or future, in height or depth— nothing in all creation can separate us from Your love.
+        - paragraph [ref=e43]: "So we trust You with our desires because You have already shown us what You desire: us."
+        - paragraph [ref=e44]: And when we understand that— delighting in you is not a discipline anymore. It’s a response. Of course we delight in You. You delighted in us first.
+        - paragraph [ref=e45]: Lord we are beginning to understand that to delight in You is to know how loved we already are.
+        - paragraph [ref=e46]: So reorder us, God. Have it all Lord.
+        - paragraph [ref=e47]: Because our hearts will always chase something. Teach them to chase You. And to trust that when You are first— we are where we were made to be.
+        - paragraph [ref=e48]: ⸻
+        - paragraph [ref=e49]: If You grant the desire—we will praise You. If You don’t—we will worship You for who you are—more than enough.
+        - paragraph [ref=e50]: But we will not walk away.
+        - paragraph [ref=e51]: For Whom have we in heaven but You? And there is nothing on earth that we desire besides You. Our flesh and our heart may fail, but You are the strength of our heart and our portion forever.
+        - paragraph [ref=e52]: You are the King of my heart. Our prince of peace.
+        - paragraph [ref=e53]: In your heavenly name we pray Amén.
+        - generic [ref=e54] [cursor=pointer]:
+          - img [ref=e55]
+          - img [ref=e58]
+  - generic [ref=e62]:
+    - button "Menu" [ref=e63]:
+      - img [ref=e65]
+      - generic: Menu
+    - button "Inspect" [ref=e69]:
+      - img [ref=e71]
+      - generic: Inspect
+    - button "Audit" [ref=e73]:
+      - img [ref=e75]
+      - generic: Audit
+    - button "Settings" [ref=e78]:
+      - img [ref=e80]
+      - generic: Settings
