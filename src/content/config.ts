@@ -68,4 +68,15 @@ const prayer = defineCollection({
 	}),
 });
 
-export const collections = { writing, thought, ship, whoami, prayer };
+const talk = defineCollection({
+	type: "content",
+	schema: z.object({
+		title: z.string(),
+		description: z.string().optional(),
+		youtubeUrl: z.string().url(),
+		pubDate: z.coerce.date(),
+		series: z.string().optional(),
+	}),
+});
+
+export const collections = { writing, thought, ship, whoami, prayer, talk };

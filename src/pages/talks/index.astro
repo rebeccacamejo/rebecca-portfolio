@@ -1,0 +1,49 @@
+---
+import { TalkItem } from '@components/cards';
+import { Header } from '@components/misc';
+import { BaseHead } from '@components/seo';
+import { SITE_TITLE } from '@data/index';
+import { getCollection } from 'astro:content';
+import RootLayout from '@layouts/root-layout.astro';
+
+const talks = (await getCollection('talk')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang='en'>
+	<head>
+		<BaseHead
+			title={`talks · ${SITE_TITLE}`}
+			description='teachings and sermons'
+			image='/images/ogimage.png'
+		/>
+	</head>
+	<body class='min-h-screen bg-white dark:bg-black'>
+		<RootLayout>
+			<div
+				id='navbar+title'
+				class='flex flex-col w-full gap-6 max-w-xl'>
+				<Header />
+				<h1 class='w-full text-7xl font-medium tracking-tight'>talks</h1>
+
+				{talks.length === 0 ? (
+					<p class='text-gray-400 dark:text-gray-500 font-medium'>coming soon.</p>
+				) : (
+					<div class='grid grid-cols-1 sm:grid-cols-2 gap-8 w-full'>
+						{talks.map((talk) => (
+							<TalkItem
+								title={talk.data.title}
+								description={talk.data.description}
+								youtubeUrl={talk.data.youtubeUrl}
+								pubDate={talk.data.pubDate}
+								series={talk.data.series}
+							/>
+						))}
+					</div>
+				)}
+			</div>
+		</RootLayout>
+	</body>
+</html>

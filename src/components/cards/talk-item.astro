@@ -1,0 +1,49 @@
+---
+import FormattedDate from '@components/misc/formatted-date.astro';
+import { getYouTubeId } from '@utils/index';
+
+const { title, description, youtubeUrl, pubDate, series } = Astro.props;
+const videoId = getYouTubeId(youtubeUrl);
+const thumbnail = videoId
+	? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+	: null;
+---
+
+<a
+	href={youtubeUrl}
+	target='_blank'
+	rel='noopener noreferrer'
+	class='group flex flex-col gap-3'>
+	<div class='relative w-full overflow-hidden bg-gray-100 dark:bg-gray-900 aspect-video'>
+		{
+			thumbnail ? (
+				<img
+					src={thumbnail}
+					alt={title}
+					class='w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-80'
+					loading='lazy'
+				/>
+			) : (
+				<div class='w-full h-full flex items-center justify-center text-gray-400'>
+					no thumbnail
+				</div>
+			)
+		}
+	</div>
+	<div class='flex flex-col gap-1'>
+		{series && (
+			<p class='text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest'>
+				{series}
+			</p>
+		)}
+		<h2 class='font-medium text-black dark:text-white group-hover:opacity-60 transition-opacity duration-150'>
+			{title}
+		</h2>
+		{description && (
+			<p class='text-sm text-gray-500 dark:text-gray-400'>{description}</p>
+		)}
+		<p class='text-xs text-gray-400 dark:text-gray-500 font-medium'>
+			<FormattedDate date={pubDate.toString()} />
+		</p>
+	</div>
+</a>

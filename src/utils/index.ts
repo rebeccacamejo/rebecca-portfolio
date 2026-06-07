@@ -120,6 +120,13 @@ export function getBackgroundColorClass(bg_colour: string): string {
   }
 }
 
+export function getYouTubeId(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+  );
+  return match ? match[1] : null;
+}
+
 export function getReadingTime(text: string) {
   const wordsPerMinute = 200;
   const words = text.trim().split(/\s+/).length;
