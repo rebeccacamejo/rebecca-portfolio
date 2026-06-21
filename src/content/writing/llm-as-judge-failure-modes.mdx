@@ -1,0 +1,55 @@
+---
+title: "LLM-as-judge has four failure modes"
+description: "LLM-as-judge scales well and catches coarse quality distinctions reliably. It also has systematic biases that will mislead you if you don't account for them."
+pubDate: '2026-04-07'
+---
+
+## Why everyone uses it anyway
+
+LLM-as-judge is the default evaluation method for most RAG and agentic systems in production, and the reason is straightforward: it's cheap, it scales, and it correlates reasonably well with human judgment on coarse distinctions. Clearly bad answers versus clearly good answers — it catches that reliably.
+
+The problem is that "coarse distinctions" is doing a lot of work in that sentence. LLM-as-judge has four specific, well-documented failure modes that will mislead you if you're not accounting for them. Knowing them isn't a reason to stop using it. It's a reason to use it correctly.
+
+## The four failure modes
+
+**Position bias.** In pairwise comparisons — show the judge two answers and ask which is better — the judge systematically favors whichever answer appears first. This isn't subtle: the same comparison with reversed order can flip the judgment. If your eval pipeline always shows the baseline first and the challenger second, you're running a biased comparison. Fix: randomize order, run each comparison both ways, average the results.
+
+**Self-preference bias.** A model judges outputs in its own style or from its own family more favorably. If you're using GPT-4 to judge outputs from GPT-4, you're not getting an independent evaluation — you're getting a judgment from a model with a conflict of interest. Fix: use a judge model that's different from or stronger than the generator. Don't use the model to grade its own homework.
+
+**Verbosity bias.** Longer answers score higher, independent of quality. A judge presented with a concise, correct answer and a verbose, partially-correct answer will often prefer the longer one. This is particularly dangerous in agentic systems where you're trying to evaluate whether the agent chose the right action — not whether it wrote a compelling justification for an action. Fix: rubrics with concrete anchors tied to content quality, not length. Explicitly instruct the judge to score on accuracy and relevance.
+
+**Poor calibration on fine-grained distinctions.** LLM-as-judge is reliable at "this answer is wrong versus this answer is right." It's unreliable at "this answer is 7/10 versus 8/10." The finer the distinction, the worse the calibration gets. This matters when you're trying to detect incremental improvement — a new retriever that improves quality by 5 points — because the judge's own noise floor may be higher than the improvement you're trying to measure. Fix: collapse fine-grained Likert scales into coarser bins, or use pairwise preference (A vs B) instead of absolute scoring for incremental eval.
+
+## What the judge doesn't have access to
+
+Beyond the specific biases, there's a structural limitation: the judge has no access to what the user actually needed. It's scoring against a rubric — groundedness, relevance, completeness — not against user satisfaction. A system that answers the question technically correctly but fails to address the underlying intent can score well on every automated metric and still produce poor user outcomes.
+
+This is why LLM-as-judge scores and user satisfaction can diverge. It's not a calibration failure — it's a fundamental mismatch between what the judge is measuring and what the user experienced. Standard benchmarks miss adversarial inputs and traffic distribution shift for the same reason. A system that scores well on a fixed benchmark can fail badly on queries that have drifted from what the benchmark represents.
+
+## How to use it correctly
+
+The right mental model for LLM-as-judge: high-volume directional signal, validated against human judgment, not a final authority.
+
+Use it for everything you can't afford to have humans review. Use it to catch regressions, monitor drift, and flag obviously bad outputs for human triage. Don't use it as the final word on whether a system is ready to ship.
+
+The validation step is not optional: before you trust your LLM-judge at scale, run it against a sample that humans have already labeled. Measure correlation. If the judge and humans disagree significantly on that sample, the judge is not trustworthy for that task — regardless of how well it performs on the dimensions it's naturally good at.
+
+The specific things to check in that validation: does the judge's ranking match human ranking? Does it catch the failure modes humans flag most often? Does it produce consistent scores for the same input across multiple runs? Judges can have high variance on borderline cases, and that variance compounds when you're using judge scores to make decisions about what to ship.
+
+## The role it actually plays
+
+LLM-as-judge is the high-volume evaluation layer — the one that runs continuously across real production traffic, catches regressions automatically, and surfaces signals for human review. Human annotation is the ground truth that the judge is calibrated against, and the final authority on high-stakes quality decisions.
+
+The failure mode I see most often: teams deploy LLM-as-judge and treat its scores as authoritative without validating that the judge is actually measuring what they think it's measuring. The judge score improved by 11 points, so they shipped it. The judge says this is a good answer, so they're done.
+
+That works until it doesn't. A judge that's systematically biased toward longer answers will tell you your verbose, bloated system is better than your concise, accurate one. A judge that self-prefers will tell you nothing changed when you switched model providers. Verify the checker before you trust it.
+
+## The practical setup
+
+For a RAG system, here's what the evaluation pipeline looks like when it's working:
+
+LLM-as-judge runs on all production traffic, sampled at a rate that's cost-effective. It scores groundedness and answer relevance per query and writes to a metrics store. Alerts fire on statistical shifts — the daily groundedness average dropped 3 points — not on individual bad answers.
+
+Human annotation covers a rotating sample of flagged outputs (low judge scores, user escalations, adversarial test cases) plus a fixed monthly holdout used to validate that judge scores are still correlating with human judgment.
+
+The monthly holdout check is the one most teams skip. It's also the one that catches drift in the judge itself — because the judge can get worse over time, either from model updates or from shifts in the production distribution that the judge wasn't calibrated for. Run the check. If correlation degrades, don't trust the judge until you know why.

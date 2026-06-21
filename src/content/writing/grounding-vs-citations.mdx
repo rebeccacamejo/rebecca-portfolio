@@ -1,0 +1,67 @@
+---
+title: "Citations don't mean grounding"
+description: "You can cite a document you never actually used. Grounding is the architectural constraint that keeps generated claims anchored to evidence — and prompt instructions aren't enough to enforce it."
+pubDate: '2026-04-15'
+---
+
+## Two different things that sound like one
+
+Grounding and citations get used interchangeably. They're not the same thing.
+
+Grounding is the architectural constraint that keeps generated claims anchored to retrieved evidence. It's about what the model actually used to produce an answer.
+
+Citations are the user-facing evidence trail — the sources shown alongside an answer so a human can verify. They're about what the model claims it used.
+
+You can have one without the other. A model can cite a document it never actually used — it produces the citation because the document was in its context and a citation looks appropriate there, not because the answer derives from it. That failure mode is different from hallucination, and in some ways more dangerous: it looks like a properly sourced answer. It passes a casual review. The error doesn't surface until someone checks the cited document and discovers the answer doesn't come from it.
+
+## The five ways grounding fails
+
+**Parametric override.** The model ignores retrieved context and answers from its training data instead. This happens when the query touches something the model knows well — common facts, frequently cited research, well-documented policies. The model "knows" the answer and uses that instead of what it was given. Retrieval worked correctly; the model just didn't use it.
+
+**Context interpolation.** The model uses retrieved context as a starting point and fills gaps with plausible-sounding fabrications. The answer is partially grounded, partially invented. This is the hardest failure to catch in review because the factual claims are mixed — some come from the context, some don't, and they're indistinguishable in the final output.
+
+**Conflation.** The model merges facts from multiple retrieved chunks incorrectly. Two chunks about related topics get combined into a claim that neither actually supports on its own. The model isn't hallucinating in the traditional sense — all the component facts exist somewhere in the context — but the synthesized claim is wrong because it attributes relationships between facts that the sources never stated.
+
+**Temporal confusion.** The model blends current retrieved information with stale parametric knowledge about the same topic. The retrieved document is current; the model's knowledge is outdated. The output mixes both without distinguishing them.
+
+**Absence hallucination.** The retrieved context doesn't contain an answer to the question, and the model fabricates one rather than abstaining. This is the most dangerous failure mode in high-stakes domains, because the system doesn't know it failed — it generates confidently from nothing.
+
+## Why prompt instructions aren't enough
+
+The default grounding approach is a system prompt instruction: "Answer using only the provided context. Do not use information outside of what's given." Clean, simple, costs nothing to implement.
+
+It's also a soft constraint. Prompt instructions can be deprioritized when they're in tension with the model's parametric confidence, with the weight of a long context window where the instruction appeared many tokens ago, or simply with other instructions that compete. The model isn't ignoring the instruction deliberately — it's a probabilistic system, and under the right conditions, that instruction loses.
+
+For low-stakes use cases, this is fine. The cost of a grounding failure is a slightly wrong answer that a user might notice and re-ask. Prompt-level grounding is sufficient.
+
+For high-stakes use cases — financial services, healthcare, legal, fraud and dispute resolution — it isn't. The cost of a grounding failure is a wrong claim that looks authoritative, gets acted on, and causes real harm. Prompt instructions are not a real safeguard there.
+
+## What structural enforcement actually looks like
+
+There are three layers of grounding architecture above prompt instructions, in increasing cost and reliability.
+
+**Structured generation with per-claim sourcing.** Force the model to output every claim paired with a source chunk ID and a supporting quote. A claim with no citable chunk becomes a visible gap in the output — the system can't silently produce an unsupported claim because the output schema requires evidence for every statement. This also gives a direct audit trail from every answer back to a source document.
+
+**Post-generation NLI verification.** After the model generates, run a natural language inference check on each claim against its cited chunk. NLI models are fast and cheap — this doesn't require a second full LLM call. The check is binary: does the retrieved chunk actually entail this claim, or not? Claims that fail get flagged before the response reaches the user. In regulated environments, this is what makes answers auditable.
+
+**Retrieval-confidence gating.** Before generation runs, check the similarity scores of the retrieved chunks. If the top chunk scores below a threshold — 0.7 is a common starting point — flag the query as potentially unanswerable before the model generates from it. This catches absence hallucination at the source: if retrieval didn't find anything relevant, don't ask the model to answer from nothing.
+
+## The design principle that holds this together
+
+The grounding architecture should match the cost of a grounding failure.
+
+A customer support bot answering return policy questions: prompt-level grounding plus an abstain instruction is sufficient. The cost of a wrong answer is a re-ask.
+
+A financial services system answering questions about products for customers: structured generation with per-claim sourcing plus NLI verification. Every customer-facing claim needs a traceable chain back to an approved source document. This isn't optional — in regulated contexts it's a compliance requirement.
+
+The system I work on sits firmly in the second category. It surfaces policy guidance and account insights to customer care professionals handling live call disputes — representatives who will act on what the system tells them, in real time, with a customer on the line. A fabricated policy claim that looks properly sourced doesn't just produce a wrong answer. It produces a wrong dispute resolution, potentially at scale across every call that day.
+
+In that context, prompt-level grounding was never a real option. Every claim the system surfaces needs to trace back to a specific policy document or account record. The representative needs to be able to see exactly where the guidance came from — not because we don't trust the model, but because the decision being made requires that the evidence chain be visible and auditable. Structural enforcement isn't gold-plating here. It's what makes the system safe to put in front of someone making a consequential call.
+
+## On citations specifically
+
+Citations aren't a substitute for grounding, but they're not useless either. A good citation system — where every citation maps to a specific chunk that was actually retrieved and actually used — gives users the ability to verify. That verification is what makes a system trustworthy over time, not just accurate on a benchmark.
+
+The failure is when citations become decorative: the model produces them because they look like the right thing to include, not because the answer derives from them. That's citation laundering — a system that looks properly sourced but isn't.
+
+The tell: if your citations can't be verified programmatically — if there's no check that citation IDs map to real retrieved chunks — your citations are decorative. Fix that before anything else in your grounding stack.

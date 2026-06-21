@@ -1,0 +1,74 @@
+---
+title: "The RAG decision you can't undo"
+description: "Chunking is the highest-leverage architectural decision in a RAG pipeline — and the most expensive to get wrong, because fixing it means re-processing your entire corpus."
+pubDate: '2026-04-24'
+---
+
+## What makes this different from other decisions
+
+Most RAG configuration decisions are cheap to change. You can swap a reranker, adjust retrieval K, update your vector DB configuration without touching the underlying index. The feedback loop is fast.
+
+Chunking is different. Your chunking strategy determines how every document in the corpus is processed, embedded, and stored. Changing it means re-chunking everything, re-embedding, and re-indexing. At enterprise scale with millions of documents, that's days of compute and a real operational event.
+
+This means chunking decisions carry weight that most other RAG decisions don't. Getting it wrong and discovering it six months into production isn't a quick fix — it's a project.
+
+## The seven strategies and when each is right
+
+**Fixed-size chunking.** Split every N tokens with optional overlap. Fast, no understanding of document structure. Use this only when your corpus is genuinely homogeneous, unstructured prose with no consistent formatting. Never use it on technical documentation, code, or anything with meaningful structure. The failure mode is splitting mid-sentence or mid-paragraph, producing embeddings that represent semantic fragments rather than coherent ideas.
+
+**Sentence-aware chunking.** Split on sentence boundaries instead of arbitrary token counts. Better than fixed-size for prose, but ignores document-level structure. Fails at paragraph boundaries where meaning often continues across sentences.
+
+**Recursive character chunking.** The LangChain default: tries to split on paragraph breaks first, then sentences, then words, then characters, until chunks fit the size budget. Better than fixed-size, still has no semantic understanding. A reasonable starting point for unstructured prose corpora.
+
+**Structure-aware chunking.** Detect headings and section boundaries, split at structural document divisions rather than arbitrary character counts. The right default for technical documentation, wikis, legal documents — anything with consistent heading hierarchy. A section is a semantic unit; a fixed token window is not.
+
+**Hierarchical parent-child chunking.** Store two representations of the same content: small child chunks (128-256 tokens) indexed for retrieval precision, and large parent chunks (full sections) returned to the model for generation context. At retrieval time, match on the child chunk to find the right needle; send the parent chunk to the model so the context is complete. This is what I default to for most structured document corpora, and I'll explain why below.
+
+**Content-type-aware chunking.** Different chunking logic for different content types within the same corpus. Code blocks get AST-aware chunking at function or class boundaries. Tables get row serialization with headers attached to every row so the relational structure survives. Prose gets recursive or structure-aware chunking. This requires a content-type router as the first stage of the chunking pipeline.
+
+**Late/contextual chunking.** Before splitting, prepend each chunk with an LLM-generated summary of its context within the broader document. Increases retrieval quality for chunks that are ambiguous in isolation, at the cost of one LLM call per chunk at index time. Expensive at scale, but effective for high-priority documents where retrieval precision is critical.
+
+## Why I default to parent-child
+
+The fundamental chunking tension: small chunks give you retrieval precision — the embedding represents one coherent concept and stays semantically tight. Large chunks give you generation context — the model has enough surrounding information to answer correctly without misreading an isolated sentence.
+
+Parent-child resolves that tension by decoupling the two operations. You retrieve at child granularity and generate at parent granularity. The cost is real: you're storing two representations of the same content, and there's a lookup step to fetch the parent after the child is matched. Storage roughly doubles for the sections that use this pattern, and there's a small latency cost on the parent fetch.
+
+I accept that cost because the alternative — sending small chunks directly to the model — produces generation failures that are hard to distinguish from retrieval failures. A 200-token chunk can be perfectly correct for retrieval and still lack enough context for the model to answer from it. Parent-child fixes this at a known, bounded overhead.
+
+## The content-type problem
+
+Most production RAG systems have mixed corpora. Not everything is prose. Code blocks, tables, and diagrams have fundamentally different structure from narrative text, and applying one chunking strategy to all of them produces silent failures.
+
+Tables are the clearest example. Fixed-size chunking across a table splits rows from column headers. The resulting chunk contains data without the column names that give it meaning. A model retrieving this chunk sees numbers without context. The retrieval looks fine — the chunk was indexed and returned — but the answer it produces is wrong because the structural relationship between rows and columns was destroyed.
+
+The fix is a content-type router as the first stage of the chunking pipeline. Every document gets classified before any chunking decision is made. Code routes to AST-aware chunking at function boundaries. Tables route to row serialization with headers prepended to every row. Prose routes to recursive or structure-aware chunking. The router adds complexity, but it's the only way to preserve the structural signal each content type carries.
+
+## Validate before you index
+
+The mistake I see most often: commit to a chunking strategy, index the full corpus, discover the failure in production.
+
+The right sequence: sample 50 documents per content type, run the chunking strategy, inspect the output manually. Are chunks semantically coherent? Are there mid-sentence splits? Are code blocks intact? Are table rows associated with their headers?
+
+Then run a small retrieval eval: 20 representative queries per content type, check whether the correct chunk exists and is semantically complete enough to answer the query. Catch chunking-level failures here, before you've indexed anything at scale.
+
+This process takes a day or two. Discovering the same failure after indexing 10 million documents takes considerably longer to fix.
+
+## The decision framework
+
+```
+Is the content structured (headings, sections)?
+├── Yes → Structure-aware or hierarchical (parent-child)
+│   ├── Sections < 512 tokens → structure-aware, section boundary splits
+│   └── Sections > 512 tokens → hierarchical parent-child
+└── No → Recursive character chunking
+    ├── General prose → 512 tokens, 10% overlap
+    └── Technical content → 256 tokens, 20% overlap
+
+Special content (always separate pipeline):
+├── Code → AST-aware, function/class boundaries
+├── Tables → row serialization with headers
+└── Multi-modal → caption generation, then treat as prose
+```
+
+This is a starting point, not a prescription. Validate against your actual corpus and your actual queries before committing. Chunking decisions that look correct on paper can still fail on a specific data distribution — and the only way to know is to test on real data before you've indexed all of it.

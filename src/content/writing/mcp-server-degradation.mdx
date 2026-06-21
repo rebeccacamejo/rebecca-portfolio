@@ -1,0 +1,64 @@
+---
+title: "One slow MCP server degrades your whole agent"
+description: "An intermittently degraded MCP server doesn't fail — it silently multiplies your agent's response time on every step that calls it. Here's what to do about it."
+pubDate: '2026-05-20'
+---
+
+## The failure that doesn't look like a failure
+
+When an MCP server goes completely down, the failure is obvious. Your agent gets an error, you investigate, you fix it or route around it. Operational, contained, findable.
+
+The harder failure is an MCP server that doesn't go down — it just gets slow. Intermittently timing out. Responding in 8 seconds instead of 300 milliseconds. Failing one in five calls.
+
+This doesn't look like a failure from the outside. The agent is still running. Responses are still coming. But if that degraded server is called more than once in a multi-step agent task — and in any realistic plan it probably is — you've just serialized a full timeout penalty into the response time on every step that calls it. The agent re-attempts in good faith each time because nothing told it the server is degraded.
+
+In a system with twelve MCP servers, one intermittently slow server quietly degrades the entire agent's responsiveness.
+
+## Why this is worse in agentic systems specifically
+
+In a stateless API, a slow dependency is a slow API call. You can time it out, circuit-break it, route around it. The blast radius is one request.
+
+In a multi-step agent loop, the same degraded server affects every step in the plan that calls it. An agent planning a task with six steps that each require a tool call from the slow server doesn't fail after the first timeout — it succeeds, slowly, with a full timeout penalty on each of those six steps. The total response time compounds.
+
+Without explicit architecture to handle this, the agent doesn't distinguish between "this tool is slow today" and "this tool is slow because this is a hard request." It treats every slow response as a possibly-valid response that just needs more time.
+
+## The actual fix
+
+Three components, all necessary.
+
+**Per-tool timeouts, short.** Most MCP tool calls should complete in under two seconds for a responsive system. Set an explicit timeout per tool — in the 1-2 second range — not a global 30-second timeout that lets the slow server eat your entire latency budget. A tool that hasn't responded in 2 seconds is almost certainly not going to give you a useful response in 10. Cut the connection, treat it as a failure, move on.
+
+**Circuit breaker with a cooldown window.** After a threshold of consecutive failures or timeouts from a specific server — 3-5 is typical — open the circuit and stop routing calls to that server for a cooldown period. This prevents the retry loop: instead of re-attempting a degraded server on every step, the circuit breaks after the first few failures and the planner has to work around the unavailability. The circuit resets after the cooldown, at which point traffic can flow back with careful monitoring.
+
+A circuit breaker is not a cache. It's specifically for a failing or degraded dependency. Don't reach for a circuit breaker when the actual problem is a working-but-slow check that you want to make faster — that's a caching problem, and conflating the two produces the wrong solution for both.
+
+**"Tool unavailable" as a first-class plannable state.** The agent's planner needs to treat "this tool is currently unavailable" as something it can reason around, not a hang it waits through. This means the planner's state machine has an explicit branch for tool unavailability: can the task be completed without this tool? Can it be completed with a different tool that provides equivalent capability? Should the user be informed and the task deferred? The planner needs to answer these questions rather than retrying indefinitely.
+
+## Why retry with exponential backoff is the wrong default here
+
+Retry with exponential backoff is the right pattern in many contexts. Background jobs, async pipelines, batch processing — if there's no user waiting and the operation can safely be retried, backoff is a good default.
+
+In user-facing agentic interactions, it's often wrong. A user is actively waiting on a response. Exponential backoff in response to a degraded MCP server means the user's wait time grows with each retry. The backoff that seems reasonable from a resilience standpoint — retry after 1 second, then 2, then 4 — is a user experience that feels like the system is frozen.
+
+Fast-fail plus circuit breaker beats backoff in this context. The first call to a degraded server fails quickly (per-tool timeout, 1-2 seconds). The circuit breaks after the threshold. Subsequent calls don't go to the degraded server at all. The user gets a faster response — either "task completed without that tool" or "this capability is currently unavailable" — instead of a compounding wait.
+
+The latency you save by not retrying is the latency the user doesn't have to sit through.
+
+## The operational discipline this requires
+
+You need per-server timeout and circuit-breaker configuration, not just a global request timeout at the outermost layer. A global timeout catches the case where the entire agent is hung, but it doesn't isolate which server caused the hang or prevent the same server from degrading future requests.
+
+You also need monitoring that's server-specific. The signal to watch: per-server timeout rate and average response latency, tracked separately for each MCP server in the system. A server that's degraded shows up as a spike in timeout rate or latency that doesn't affect the other servers. That signal fires your alert before the problem has been compounding across thousands of user interactions.
+
+At scale — a dozen or more MCP servers — the operational risk is exactly this: a single degraded server among many, not obviously failing, quietly degrading overall agent responsiveness because nothing stops it from being retried repeatedly in multi-step plans. A global timeout at the top level doesn't catch this.
+
+## What this looks like in practice
+
+Every MCP server in your system should have:
+
+- A per-tool timeout (1-2 seconds for most calls)
+- A circuit breaker with a configurable failure threshold and cooldown window
+- Independent latency and timeout-rate monitoring in your observability stack
+- A defined "unavailable" state that the agent's planner can reason around
+
+This is more configuration than a global timeout and retry loop. It's also the architecture that doesn't silently degrade when one of twelve servers has a bad day.

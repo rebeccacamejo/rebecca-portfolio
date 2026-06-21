@@ -1,0 +1,59 @@
+---
+title: "Multi-agent is a cost, not an upgrade"
+description: "Multi-agent systems multiply model-call cost, multiply failure surface, and make debugging harder. The trigger for choosing them isn't complexity — it's a specific, nameable role conflict."
+pubDate: '2026-05-11'
+---
+
+## Why the instinct is wrong
+
+There's a persistent framing in the agentic AI space that treats multi-agent systems as the advanced version of single-agent systems — as if the natural progression is single agent → multi-agent, and the question is just when you're ready to upgrade.
+
+This is wrong. Multi-agent isn't a sophistication upgrade. It's a cost you're paying for a specific capability. If you can't name the capability it's buying you, you're paying the cost without a reason.
+
+## What multi-agent actually costs
+
+**Model calls multiply.** In a supervisor-worker pattern, every task requires calls from the orchestrator plus calls from every worker involved. A task that requires three specialized agents costs you at minimum three times the generation cost of a single agent handling the same task. For complex tasks with multiple rounds of coordination, the multiplier is higher.
+
+**Failure surface multiplies.** In a single agent, there's one place a generation failure can happen. In a multi-agent system, a failure can originate in any agent, in any handoff between agents, or in the coordination logic itself. An error from a worker that gets passed to the supervisor — which then reasons forward from that error as if it were correct — produces failures that are much harder to trace than anything in a single agent.
+
+**Debugging gets harder.** A single agent produces one call stack. A multi-agent system produces correlated events across multiple agents that you need distributed tracing to follow. When production degrades, finding the source requires correlating events by request ID across the whole graph. That's real operational overhead.
+
+None of this means multi-agent is wrong. It means it's a cost that needs a specific capability requirement to justify.
+
+## The trigger condition
+
+The right question isn't "is this problem complex enough for multi-agent?" It's: would a single prompt have to hold genuinely conflicting objectives simultaneously, in a way that demonstrably hurts output quality?
+
+The example that actually triggers it: a researcher role that should be thorough and slow, and a writer role that should be concise and fast. A single prompt trying to do both tends to compromise on each — the research phase is cut short because the prompt is also optimizing for conciseness, or the writing phase is bloated because the prompt is also optimizing for thoroughness. Separating them into two specialized agents lets each optimize for its actual objective.
+
+That's a nameable conflict. If you can't name the equivalent conflict in your specific task, you don't need multi-agent.
+
+## The ReAct failure modes specifically
+
+ReAct — reason, act, observe, repeat — is the most common single-agent loop pattern and has three specific failure modes that matter whether you're running one agent or ten.
+
+**No iteration cap.** Without a hard maximum on loop iterations, the model can keep deciding it needs one more tool call indefinitely. This blows your latency budget and can produce runaway costs. Fix: hard iteration cap enforced at the orchestration layer, not in the model's reasoning.
+
+**Unvalidated observations.** The model calls a tool, receives a response, and treats that response as true. If the tool returns a hallucinated result, a malformed output, or a deliberately crafted adversarial response, the model reasons forward from it as if it were correct — each subsequent step compounds the error. Fix: schema validation on tool responses before they enter the model's context. A response that doesn't match the expected schema should be treated as a failure, not a valid observation.
+
+**Unserialized state.** If a ReAct loop is interrupted mid-execution — network failure, timeout, process crash — and the state wasn't serialized to durable storage, the run can't be resumed. It restarts from scratch, which is expensive and can produce duplicate side effects from tool calls that already executed. Fix: serialize agent state after every tool call so interrupted runs can resume from the last checkpoint.
+
+## Plan-and-execute as an alternative
+
+For tasks where the problem is well-defined upfront, plan-and-execute is often a better pattern than ReAct for a single-agent context.
+
+Build a full plan before executing any step. Execute each step in sequence. If a step fails, optionally replan — but the replanning is bounded, not an open-ended loop. This gives you a more predictable cost profile (you know how many steps are in the plan before you start) and better failure isolation (a step failure is a specific, named failure at a specific point in the plan, not a diffuse loop failure).
+
+The tradeoff: plan-and-execute requires the problem to be well-decomposable upfront. For tasks where the right next step depends on the result of the previous one in ways you can't anticipate, ReAct's adaptive loop is the right shape. For tasks where the plan is stable — extract these fields, validate against this schema, write to this destination — plan-and-execute is simpler and more predictable.
+
+## When multi-agent is actually right
+
+There are real cases where multi-agent is the right call:
+
+- Genuinely parallel workstreams where waiting for sequential execution would be unacceptable — running a research thread and a data retrieval thread simultaneously, merging results.
+- Distinct expert roles with genuinely conflicting optimization objectives that a single prompt demonstrably can't hold without degrading one.
+- Long-horizon tasks where no single context window can hold the full state — breaking the task into phases, each handled by an agent with its own context.
+
+In all of these cases, you can name exactly what multi-agent is buying you. The increased cost, the broader failure surface, the harder debugging — those are prices you're paying for a specific capability. That's a reasonable tradeoff.
+
+Reaching for multi-agent because the problem sounds complex, without a named capability requirement, is paying those costs for nothing. Default to single agent. Add agents when you can name specifically what they're adding.

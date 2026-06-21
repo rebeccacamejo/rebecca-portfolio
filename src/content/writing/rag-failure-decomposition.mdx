@@ -1,0 +1,81 @@
+---
+title: "Bad RAG answers have three separate root causes"
+description: "Retrieval miss, faithful-but-wrong-context, and generation hallucination require completely different fixes. The diagnostic discipline: decompose before you change anything."
+pubDate: '2026-03-30'
+---
+
+## The habit that breaks teams
+
+A user reports the system gave a wrong answer. The instinct is to treat it as one problem — "answer quality is bad" — and start tuning. Change the prompt. Swap the model. Increase context.
+
+This almost never works, because a bad final answer in a RAG system could be three completely different failures with completely different root causes. Treating them the same means you're changing the wrong thing for two out of three cases.
+
+The discipline: decompose before you touch anything.
+
+## The three failure modes
+
+**Retrieval miss.** The document containing the correct answer was never retrieved. It wasn't in the top-K candidates. The model never had access to the information it needed. No generation-layer fix addresses this — the model can't generate from evidence it was never given.
+
+**Faithful-but-wrong-context.** The right kind of document was retrieved, but it was the wrong specific document. The model used what it was given faithfully — its answer is grounded in the retrieved context — but the retrieved context itself was incorrect, outdated, or adjacent to the real answer without actually containing it. The generation quality looks fine. The answer is still wrong.
+
+**Generation hallucination on good context.** The right document was retrieved and ranked correctly. The model then ignored parts of it, fabricated details beyond what it says, or conflated it with something else. This is a genuine generation failure — and it's the least common of the three, despite being the first thing most people blame.
+
+The fix for each is completely different. Retrieval miss: fix chunking, embedding, or the query. Faithful-but-wrong-context: fix retrieval precision, metadata filtering, or document freshness. Generation hallucination: fix grounding architecture, prompt structure, or add a post-generation verification pass. Diagnosing the wrong one means spending time in the wrong layer.
+
+## How to measure each layer independently
+
+The discipline here is a decomposed scorecard — separate metrics for retrieval, generation, and the system overall. One blended quality score hides which layer failed.
+
+**For the retrieval layer:**
+
+- **Recall@K**: of all queries, what fraction have the correct chunk in the top-K retrieved results? This is your ceiling metric — if it's low, nothing downstream can fix it.
+- **Precision@K**: of the chunks retrieved, what fraction are actually relevant? Low precision means you're feeding the model noise alongside the signal, which increases hallucination risk.
+- **MRR (Mean Reciprocal Rank)**: how high up does the first relevant result appear? Useful when there's one canonical answer and you care about top-of-list quality.
+- **NDCG**: ranking quality that accounts for graded relevance and position. The most complete single retrieval metric — captures both what you found and where you put it.
+
+These need to be measured before generation runs. Pull the raw retrieved set, check it against labeled ground truth, get your numbers. Only then look downstream.
+
+**For the generation layer:**
+
+- **Groundedness/Faithfulness**: does every claim in the generated answer trace back to the retrieved context? Claim-decompose the answer, check each claim against the context. Low groundedness means hallucination on top of retrieval that worked.
+- **Correctness**: is the answer actually true, relative to ground truth? This is the metric users care about — but it conflates retrieval failure and generation failure into one number, which is why you measure it last, not first.
+- **Answer relevance**: does the answer address what was actually asked? Catches the failure mode where the model answers an adjacent question because that's what the retrieved chunk was about.
+
+**The diagnostic rule:**
+
+| Signal | Problem | Fix |
+|--------|---------|-----|
+| Low recall@K | Retrieval miss | Chunking, embedding, query rewriting |
+| High recall, low answer quality | Grounding or generation | Reranker, prompt, NLI verification |
+| Good offline scores, poor production | Distribution shift | Expand eval set with real queries |
+| Good answers, bad citations | Citation architecture | Not a generation problem |
+
+## The evaluation loop
+
+Evaluation isn't a one-time gate before launch. It's a loop with four layers.
+
+First, define what "good" means for this specific use case — accuracy, groundedness, citation correctness, latency, refusal quality. Different use cases have different answers. Get alignment on this before you build the scorecard.
+
+Second, build a stable benchmark: representative queries, edge cases, adversarial inputs, and regression cases. Adversarial inputs specifically — the kinds of queries designed to surface failure modes — are where most teams underinvest. Standard benchmarks miss them entirely, which is why a system that scores well on a benchmark can still fail badly on real production traffic.
+
+Third, score by layer, not as one blended number. Retrieval metrics separately from generation metrics. If your overall score improves but retrieval recall drops, you need to know that.
+
+Fourth, use results to make exactly one decision: keep, tune, replace, or block release. The evaluation loop has to terminate in an action, not just a report.
+
+## The scenario that surfaces this
+
+Here's a real diagnostic shape: you ship a new reranker, offline answer quality improves, but production complaints increase — users say the system is slower and refuses more often.
+
+The instinct is to blame the reranker. But the reranker improved offline quality, which means the issue is somewhere else. The right diagnostic: scope the production symptom first. Is the problem latency, over-refusal, or general dissatisfaction? Then slice your query set — clearly answerable, truly unanswerable, borderline — and compare offline behavior against live behavior for each slice.
+
+If the system is refusing answerable queries, the refusal threshold is the problem, not the reranker. If offline scores improved but production got worse, suspect eval overfitting or distribution shift — your eval set no longer represents real traffic.
+
+The order: verify the symptom, isolate the failing layer, confirm the root cause with sliced metrics, then change the smallest lever first.
+
+## What this requires in practice
+
+You can't decompose failures without decomposed instrumentation. That means logging retrieval results separately from generation outputs, storing raw retrieved chunks with their scores, and tracking retrieval and generation metrics on separate dashboards.
+
+It also means maintaining an eval set with labeled ground truth at the retrieval layer, not just at the final answer layer. Most teams skip this because it's more expensive to label. Without it, you have no way to distinguish a retrieval miss from a generation failure, and you'll spend months tuning the wrong thing.
+
+When something breaks in production, decomposed instrumentation means you can localize the failure in minutes instead of days.

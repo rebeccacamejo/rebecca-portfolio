@@ -1,0 +1,72 @@
+---
+title: "In high-stakes AI, self-correction is the wrong default"
+description: "In domains where a wrong autonomous action has real financial and customer consequences, stakes-based escalation isn't a design nicety — it's what the architecture has to look like."
+pubDate: '2026-06-09'
+---
+
+## The failure mode that's easy to miss
+
+There's a pattern in agentic system design that's technically sophisticated and practically wrong for high-stakes domains: the system detects a low-confidence or contradictory output and automatically retries or self-corrects without any human in the loop.
+
+This pattern works well in a lot of contexts. A coding agent that generates failing tests should retry. A summarization agent that produces an output contradicting its source document should revise. Silent correction for reversible, low-stakes failures is often the right design — it's faster for the user and doesn't generate noise.
+
+In fraud detection and dispute resolution, this pattern is dangerous. The failure mode isn't the model being wrong on an isolated query. It's the system being confidently wrong about a consequential action, with no human positioned to catch it before that action executes.
+
+## Stakes-based escalation as an architectural shape
+
+The design principle isn't "human in the loop for everything" — that eliminates the value of agentic systems. It's that the escalation path should be determined by the stakes of the specific action, not by the system's general autonomy level.
+
+Before an action executes, evaluate two things. First, is the action reversible? A read operation, a classification, a recommendation that a human will review — these are recoverable if wrong. A transaction, a chargeback approval, a fraud flag that triggers account action — these are not, or they're expensive and disruptive to reverse. Second, what's the confidence level on the output?
+
+This produces a decision matrix, not a binary rule:
+
+- **High confidence, reversible action**: execute autonomously.
+- **High confidence, irreversible action**: execute with audit trail, escalation available on appeal.
+- **Low confidence, reversible action**: flag for review, don't block.
+- **Low confidence, irreversible action**: mandatory human review before execution.
+
+The fourth quadrant is where disputes and fraud decisions often live. The action is real: funds move, accounts get flagged, chargebacks are approved or denied. The confidence is not always high: disputes involve conflicting claims, ambiguous evidence, edge cases the model hasn't seen. Autonomous execution in this quadrant, without a human positioned to intervene, is a system design that guarantees you'll eventually take a wrong irreversible action at scale.
+
+## The specific failure modes in high-stakes RAG
+
+High-stakes agentic systems that use RAG for grounding have specific failure modes that are more dangerous than in low-stakes contexts.
+
+**Absence hallucination.** The retrieved context doesn't contain a clear answer to the question. The model, rather than abstaining, produces a confident-sounding answer from nothing. In a low-stakes context, this is a quality problem. In a dispute context, this is a compliance problem: a decision was made, at scale, based on a fabricated rationale.
+
+The fix: a retrieval confidence threshold as a gate before generation. If the top retrieved chunk scores below a meaningful similarity threshold, flag the query as potentially unanswerable. Don't generate. Route to human review with the query and the low-confidence signal. In regulated environments, "I don't have enough information to answer this" needs to produce a specific, documented escalation path — not a generic abstention, and not a fabricated answer.
+
+**Conflation.** The model merges evidence from multiple retrieved documents into a claim that neither document actually supports independently. In dispute resolution, this produces rationales that cite real documents but draw conclusions those documents don't reach. The citations check out. The reasoning doesn't hold under scrutiny.
+
+The fix is structured generation with per-claim sourcing: require the model to attribute every factual claim to a specific document and supporting quote. A claim with no attributed source becomes a visible gap in the output, not a silent hallucination buried in fluent text. In a regulated context, that gap has to trigger review — a rationale can't go forward with unsupported claims.
+
+## What escalation actually looks like
+
+The common design mistake is treating escalation as a bare error or a silence. "The system can't process this request" with no path forward. Users either re-ask the same question, escalate through a different channel, or give up. None of these are good outcomes.
+
+Good escalation presents explicit options. Not "this is uncertain" but "here are the options: accept this preliminary assessment, request human review, or flag for specialist review." The user understands what's happening and has agency in what happens next.
+
+For high-stakes autonomous decisions — actions the agent takes without waiting for a user — escalation means pausing the action and presenting it for approval before execution, with enough context that the approving human can make an informed decision. Not "do you approve? yes/no" with no context. A summary of what the agent found, what action it's proposing, what evidence it's drawing on, and what the alternatives are.
+
+This is slower. It's meant to be. In a domain where a wrong action has real financial and customer consequences, the cost of slowing down a decision to get it right is lower than the cost of executing a wrong decision at scale.
+
+The system I've been building lives in this exact quadrant. It's an AI assistant for customer care professionals handling call disputes — the kind of decision where a wrong outcome means a customer is wrongly denied, a fraudulent claim gets approved, or a policy exception gets made without justification. The stakes are real and the actions are hard to undo.
+
+The AI's job is to help the representative, not replace them. It surfaces account insights pulled from a mix of structured and unstructured data sources — transaction history, previous contact notes, policy documents, case precedents — that no human could reasonably hold in working memory during a live call. It flags policy adherence issues in real time. It compresses what used to require months of training into something a new representative can lean on from their first week.
+
+But the decision stays with the person. The AI proposes. The care professional disposes. That's not a limitation of the technology — it's the right architecture for a domain where being wrong has a real customer on the other end of it. A fully autonomous system in this context wouldn't just produce wrong decisions. It would produce wrong decisions at call center scale, with no human in a position to catch them before they went out.
+
+## The evaluation dimension that matters most
+
+Agentic systems need evaluation of whether an action achieved its real intended effect, not just whether it returned without an error.
+
+In high-stakes domains, this means tracking not just system accuracy on a test set but downstream outcomes: escalation rate, human override rate, the rate at which system decisions were reversed on appeal. These aren't just product metrics — they're the signals that tell you whether the system is making decisions that hold up under human review.
+
+A system with high offline accuracy and high human override rate has a real problem. Either the offline accuracy is measuring the wrong thing, or the system is confident and wrong in ways that humans catch but automated eval doesn't. Both diagnoses lead to the same fix: more adversarial test cases, specifically targeting the scenarios where confidence is high and the underlying reasoning doesn't hold up.
+
+## The through-line
+
+Human-in-the-loop isn't a concession to risk aversion. It's an architectural choice about where human judgment is necessary in the decision process, given the stakes of what the system is deciding.
+
+In low-stakes contexts, autonomous correction is efficient and reasonable. In fraud detection and dispute resolution, the architecture has to account for the fact that some decisions, made at scale, can't be easily undone — and the cost of getting those decisions wrong is borne by customers, not just by a quality metric.
+
+That's not a reason to avoid agentic systems in high-stakes domains. It's a reason to design them with the right escalation paths, the right confidence thresholds, and the right audit trails. The places where human judgment is mandatory should be explicit by design, not discovered in production.

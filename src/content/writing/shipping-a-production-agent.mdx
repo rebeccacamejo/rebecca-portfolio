@@ -1,0 +1,79 @@
+---
+title: "What shipping a production agent actually looks like"
+description: "I went live with an AI agent three weeks ago. Here's everything I didn't know I didn't know — latency killing adoption, becoming the eval system, and lost-in-the-middle showing up in a 20,000-token prompt."
+pubDate: '2026-06-19'
+---
+
+## The gap nobody talks about
+
+There's a version of AI systems engineering that lives in study guides, papers, and interview prep. It's coherent. The failure modes are named. The fixes are known. You apply LCFE — latency, cost, failure, evaluation — and you make informed tradeoffs.
+
+Then there's the version that exists after you go live with real users.
+
+I've been in the second version for three weeks. What I've learned in that time is harder to find documented than anything in the study guides. This is my attempt to document it.
+
+## Latency hits user adoption before you have time to measure anything else
+
+The first signal wasn't a quality problem. It was adoption. Users were dropping off, and the initial instinct was to look at the product — the UX, the feature set, whether we were solving the right problem.
+
+It wasn't the product. It was latency.
+
+Our p95 response time is around 6 seconds. Nobody waits that long. The mental model users have for an AI assistant is closer to autocomplete than a database query. When the response takes multiple seconds, they assume it's broken, not that it's thinking.
+
+The lesson: latency is a user experience problem before it's an engineering metric. You can have a system that produces better answers than anything else on the market and still fail adoption because the answers take too long to arrive. Measure p50 and p95 from day one. Not from the model's perspective — from the user's. End to end, including network.
+
+The fixes are real but not free. Per-tool timeouts instead of a global timeout stops one slow MCP server from eating your entire budget. Streaming responses changes the perceived latency even when the actual latency is the same — users feel like something is happening. Caching at the embedding layer for repeated queries. None of these are optional in production; they're just not visible until you need them.
+
+## I became the eval system
+
+The study guides make evaluation sound like a solved problem. Build your golden dataset, set up LLM-as-judge, track groundedness and recall@K, alert on statistical drift. Clean, automated, scalable.
+
+In practice, when you first go live, none of that infrastructure exists. You built the agent. You shipped it. And now you are the evaluation system.
+
+What that actually looked like: I was reading outputs. Flagging bad ones. Categorizing the failure mode — was this a retrieval miss? Faithful-but-wrong-context? Hallucination on good retrieval? I was building the taxonomy and the intuition at the same time as I was supposed to be building the infrastructure to automate it.
+
+In three weeks I've hand-labeled around 150 call transcripts. Those are now the seed of the golden dataset.
+
+The thing I didn't expect: the labeling work isn't wasted. Those hand-labeled examples are the most valuable thing I've produced since going live. They're the ground truth that any automated eval system has to be validated against. The instinct is to skip straight to automation, but you can't validate an LLM judge without human labels to compare it to. The hand-labeling phase is not a workaround for not having eval infrastructure — it's a prerequisite for building eval infrastructure that actually works.
+
+What I'm building toward: LLM-as-judge running on sampled production traffic, calibrated against the hand-labeled set, with a monthly holdout to check that the judge's scores are still correlating with human judgment. That's the pipeline. I'm not there yet. But I know what I'm building because I've done the human version of it first.
+
+## No distributed tracing means debugging in the dark
+
+Agentic systems fail in ways that are hard to trace without proper instrumentation. A bad answer doesn't tell you whether the failure was at retrieval, at reranking, at the generation step, or somewhere in the tool-calling loop. Without per-step logging, you're debugging a black box.
+
+The failure that surfaced this most clearly: the agent makes up to four LLM calls throughout a single customer call, each time pulling more of the live transcript via a transcript API and passing along the previous questions asked. There's no session memory — each call is largely stateless, anchored to what the transcript has captured so far. When something went wrong with the final output, we had no clean way to reconstruct what the agent actually saw at each of those four stages, where the transcript had cut off at that point, or which LLM call introduced the failure. The full picture of one customer interaction was spread across four separate calls with no thread connecting them. Distributed tracing gave us that thread — tying each LLM call back to its transcript snapshot and its position in the interaction chain is what made post-call debugging tractable.
+
+The problem with adding distributed tracing after the fact is that you have to retrofit it into a system that wasn't designed with trace IDs flowing through every component. It's doable, but it's disruptive. The lesson is to instrument from day one — even if the dashboard is ugly and incomplete, having a trace ID that connects a user query to the retrieved chunks to the final output to the user is the thing that makes post-launch debugging tractable.
+
+What I track now, or am actively building toward: a trace per request that includes the raw query, the embedded representation (or at least the top retrieved chunks with scores), the reranker output, the generation input and output, and the tool calls with latencies and return values. When something breaks, I want to be able to pull a trace ID and see the full chain in under a minute.
+
+## Lost-in-the-middle is a real production problem
+
+There's a known research finding called lost-in-the-middle: language models attend less reliably to information in the middle of a long context. Content at the beginning and end gets attended to more consistently. Content in the middle gets dropped.
+
+I read about this during prep. I didn't feel it until production.
+
+We have a long system prompt — around 20,000 tokens before any retrieved context is added. The instructions in the middle of that prompt are the ones that get ignored. Not always. Not reliably. But enough that we've seen outputs where the model behaves as if a constraint or instruction that's clearly in the prompt simply isn't there.
+
+The practical fixes: restructure the prompt so that critical instructions are at the beginning or the end, not buried in the middle. For truly non-negotiable constraints — things the system must never do or always do — repeat them at both ends. Accept that a long prompt doesn't mean a fully-read prompt.
+
+The deeper fix is to question whether the long prompt is the right architecture at all. Some of what's in a long system prompt belongs in retrieved context instead — fetched only when relevant, not always present. That's a harder refactor, but it's the right direction.
+
+## What I'm actually doing now
+
+Shipping an agent is not the end of the engineering work. In some ways it's the beginning of the hard part — the part that doesn't have clean answers in the literature because it depends on your specific users, your specific corpus, your specific latency budget and cost constraints.
+
+The priorities in order of what I wish I'd had from day one:
+
+**1. End-to-end latency instrumented from the user's perspective, not the model's.** Streaming where possible. Per-tool timeouts, not a global one.
+
+**2. A trace per request.** Ugly is fine. The trace ID needs to flow through retrieval, reranking, tool calls, and generation from day one.
+
+**3. Hand-labeled examples starting week one.** Not to have a golden dataset immediately — to start building the intuition that any automated eval system has to match. The labeling is how you learn what "good" actually means for your use case.
+
+**4. Prompt structure audited for lost-in-the-middle.** Critical constraints at the top and bottom. Long prompts questioned, not celebrated.
+
+**5. LLM-as-judge as the second eval layer, not the first.** The first is human. The second is automated and validated against the human labels.
+
+The study guide version of AI systems engineering is real and useful. But production is where you find out what you actually understand versus what you just know. For me, the gap between those two things turned out to be bigger than I expected — and closing it is what's making me a better engineer.

@@ -1,0 +1,24 @@
+---
+title: "LCFE is how I know I'm thinking like a senior engineer"
+description: "Latency, Cost, Failure, Evaluation. Four questions that changed how I answer every architecture question."
+category: 'ai'
+pubDate: 'Jun 19 2026'
+---
+
+There's a specific shift I've noticed in how I think about AI system design lately. I used to answer architecture questions by reaching for the pattern. RAG or long context? Single agent or multi-agent? Cross-encoder or bi-encoder?
+
+Now I reach for four questions first: **What does this cost in latency? What does it cost in dollars? How does it fail, and what's the blast radius? And how will I know when it's failing?**
+
+Latency, Cost, Failure, Evaluation. LCFE.
+
+It sounds simple. It is not. Most of the interview prep I did before my current role was about knowing what things are. LCFE is about knowing what things cost — and those are completely different skills.
+
+Knowing that a cross-encoder reranker improves precision is table stakes. Knowing that it adds 50-200ms on GPU, that you can only afford to run it on a candidate set of 50 not 5,000, that the failure mode is silent degradation when the model is domain-mismatched, and that you won't catch that failure without tracking recall@K separately from precision@N — that's the senior-level version of the same knowledge.
+
+I didn't get there from reading papers. I got there from shipping something and watching it behave in production in ways I didn't anticipate.
+
+Latency hits user adoption before you've had a chance to measure anything else. Cost compounds in ways that don't show up in your prototype. Failures in agentic systems are silent, not loud — the system keeps running and confidently producing wrong answers. And evaluation is, it turns out, the hardest part: you can't know if any of the other three are actually under control without a real eval system in place, which most teams don't have on day one of going live.
+
+LCFE gives me a frame for what to ask before I commit to an architectural decision. Not "will this work?" but "what does working actually cost, and what happens when it stops working, and how will I know?"
+
+That question — all four parts of it — is the difference between designing something that works in a demo and something that holds up in production. I'm still learning it. But I finally have the frame.

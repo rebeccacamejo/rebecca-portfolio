@@ -1,0 +1,69 @@
+---
+title: "Retrieval quality is the ceiling. The model is not."
+description: "The dominant failure mode in production RAG is silent: bad retrieval producing a confident, wrong answer. Here's how to diagnose it before you touch anything else."
+pubDate: '2026-03-21'
+---
+
+## The part everyone gets wrong
+
+When a RAG system gives a bad answer, the instinct is to look at the model. Improve the prompt. Switch to a bigger model. Add more context. That instinct is almost always wrong.
+
+In production RAG systems, the binding constraint is retrieval quality, not the language model. The model is downstream of retrieval — it can only generate from what it was given. Feed it the wrong chunks, and no amount of prompt engineering changes the output ceiling.
+
+The dangerous part is that retrieval failure is silent. The system doesn't throw an error when it retrieves the wrong document. It generates fluently from whatever it was given. The answer looks confident. It's just wrong.
+
+## What the pipeline actually looks like
+
+A RAG call has three sequential steps: embed the query, search the vector index, generate from the retrieved context. Every additional stage — reranking, query rewriting, HyDE — adds to that stack. The critical thing is that these steps are cumulative. If step one or two fails, step three cannot recover it.
+
+This has a specific implication for latency budgets. Embedding a query takes roughly 10ms. Approximate nearest-neighbor search at scale takes 20-50ms. Reranking adds 50-200ms depending on how many candidates you're scoring. Model inference dominates at 500ms to 2 seconds. The floor is fixed — every call pays for all three stages in sequence.
+
+It also has a cost implication most teams undercount. Context cost scales with how many tokens go into the generation step. Retrieving 20 chunks instead of 5 because you're not confident in your retrieval quality isn't a free safety net — you're paying for every token on every call, regardless of relevance.
+
+## The diagnostic that actually matters
+
+Before you change anything in a broken RAG system, check recall@K on the raw retrieval set.
+
+Recall@K answers a simple question: is the document that contains the right answer actually in the top-K retrieved results? Not ranked first, not presented to the model cleanly — just present in the candidate set at all.
+
+If recall@K is low, the right chunk was never retrieved. The model never had access to the information it needed. No reranker, no prompt, no model upgrade fixes that. You have a retrieval problem: look at the embedding model, the chunking strategy, or the query itself.
+
+If recall@K is healthy but the answer is still wrong, the right chunk was retrieved and either wasn't surfaced by the reranker, wasn't used by the model, or was used incorrectly. That's a different problem with a different fix.
+
+Collapsing both into "the answer quality is bad" and tuning the generator is why teams spend months in the wrong layer.
+
+## RAG versus long-context stuffing
+
+There's a real alternative worth addressing directly: instead of retrieval, just put everything into a 1M-token context window. No retrieval step to get wrong, no chunking decisions, perfect recall by definition.
+
+For small, static, single-tenant corpora — under 100K tokens — I'd actually consider it. The operational simplicity is real and I have no interest in maintaining retrieval infrastructure I don't need.
+
+For anything else, I'd choose RAG. Not for architectural elegance, but for cost and access control.
+
+Cost: stuffing 1M tokens into every query regardless of what was asked is expensive at scale, and that cost compounds with every request. RAG retrieves roughly the 2K tokens actually relevant to the question. At volume, that difference is significant.
+
+Access control: in a multi-tenant system, you cannot mix all tenants' documents into one context window. The retrieval layer is where data isolation is enforced — filtering by org ID at the vector DB query level, before results are ever returned. Long context has no equivalent mechanism for this.
+
+The tradeoff I'm accepting with RAG: a retrieval step that can fail silently, added latency, and the operational overhead of an index I have to keep current. I accept all of that because retrieval cost scales with corpus size in a way I can control, while context cost scales with every token on every call regardless of relevance.
+
+## What to actually measure
+
+Two numbers, measured independently, before you blame anything:
+
+**Recall@K** — what fraction of queries have the correct chunk in the top-K retrieved results. This is retrieval's job.
+
+**Precision@N** — of the chunks actually sent to the model after reranking, what fraction are genuinely relevant. This is the reranking and filtering job.
+
+If recall is low, you have a retrieval problem. Fix chunking, the embedding model, or the query.
+
+If recall is fine but precision is low, you have a ranking problem. Fix the reranker.
+
+If both are fine and answers are still wrong, you have a grounding problem. The model had the right information and didn't use it correctly. That's a different failure mode entirely — and the fix is different again.
+
+Measure them separately. A good answer can hide bad retrieval, and a bad answer can hide good retrieval that the model then ignored. You need independent metrics to know which layer actually failed.
+
+## The rule that holds everything else together
+
+If you're diagnosing a RAG quality problem and your first move is "use a bigger model" or "improve the prompt" — stop. Those are generation-layer interventions. The generation layer is downstream of retrieval. You haven't checked the right thing yet.
+
+Check recall@K first. If the right document isn't in the candidate set, you've found your problem. Everything else is optimization on top of a broken foundation.

@@ -1,0 +1,67 @@
+---
+title: "A small reranker lift on a specialized corpus is a diagnosis"
+description: "When a general-purpose reranker underdelivers on a specialized domain, the small lift is the signal — not a reason to tune further. Here's how to read it."
+pubDate: '2026-05-02'
+---
+
+## The number that's easy to misread
+
+Your team ships a reranker. Pre-reranking precision@5 was 0.44. Post-reranking it's 0.47. Three points.
+
+A teammate proposes removing it to save latency. Three points isn't compelling.
+
+The instinct to remove it is understandable. It's also wrong, and the reason why tells you something specific about how to diagnose reranking problems.
+
+A three-point lift from a general-purpose cross-encoder on a specialized corpus — legal, medical, financial, any domain with its own language and relevance conventions — isn't evidence that reranking is marginally working. It's evidence that the reranker doesn't understand the domain. Those are different problems with different solutions.
+
+## The distinction that matters first
+
+Before diagnosing any reranking problem, you need two separate numbers: recall@K and precision@N. These measure different things, and confusing them will send you to the wrong fix.
+
+**Recall@K** is retrieval's job. It answers: is the correct document even in the candidate set? If the correct chunk is ranked 15th out of 50 candidates, recall@50 is 1.0 — retrieval worked, it found the right document. If the correct chunk isn't in the top 50 at all, recall@50 is 0 — and no reranker fixes that, because reranking only reorders what was already retrieved.
+
+**Precision@N** is reranking's job. It answers: of the chunks actually sent to the model after reranking, how many are genuinely relevant? If your recall@50 is healthy but precision@5 is low, the right document is in the candidate set — it's just ranked 15th, and the model is seeing five less-relevant chunks ranked above it. That's a reranking problem.
+
+Diagnostic rule: check recall@K before you touch the reranker. If recall is low, fix retrieval. Fixing the reranker when the document isn't even in the candidate set is wasted effort.
+
+## What a small lift actually signals
+
+Back to the three-point scenario. If recall@K is healthy — say 0.89 — and the reranker is only delivering 3 points of precision improvement, the reranker can retrieve the right documents but can't sort them correctly for this domain.
+
+On a legal corpus, that means the model can't distinguish legally relevant from legally adjacent. It returns results that are "related to" the query, but it has no concept of case law authority, statutory hierarchy, or the specific legal framing that makes one document authoritative and another merely tangential.
+
+The root cause: `ms-marco-MiniLM` and similar general-purpose cross-encoders were trained on MS MARCO web search data. They're good at web relevance. They have no notion of legal relevance. Applying a web search reranker to a legal corpus and expecting full lift is like using a general-purpose similarity measure and expecting it to understand domain-specific ranking.
+
+A 15-20 point lift is what you should expect from a cross-encoder that actually understands the domain. Getting 3 tells you the reranker doesn't.
+
+## What to actually do
+
+The fix is not removing the reranker. Removing it locks you at precision@5 = 0.44 permanently. The fix is getting a reranker that understands the domain.
+
+**First: evaluate domain-matched alternatives.** Cohere Rerank has strong performance on professional corpora. Domain-specific cross-encoders exist for legal and medical text. Run the same eval set against a domain-matched reranker and see if you get closer to the expected 15-20 point lift.
+
+**Second: layer metadata boosting.** A cross-encoder gives you a relevance score. For specialized domains, relevance alone isn't always the right signal — authority matters too. A Supreme Court ruling should outscore a law review article at equivalent relevance scores. You can implement this without a separate model: after the cross-encoder scores, apply a metadata-based multiplier by source authority, recency, or document type.
+
+```
+final_score = cross_encoder_score × recency_weight × authority_weight
+```
+
+This is underused and effective because a highly relevant but outdated document often matters less than a slightly less relevant current one.
+
+**Third: only after fixing the reranker, revisit K and N.** Increasing K before you have a reranker that can actually discriminate just gives the model more poorly-ordered documents. It's the right lever after you've confirmed the reranker is working.
+
+## The latency math
+
+A cross-encoder runs a full forward pass per candidate-query pair. This is why you don't run it on your entire corpus — you pre-filter with retrieval, then rerank a small candidate set. At K=50 candidates on GPU, expect 50-200ms. That's real latency added to a pipeline budget.
+
+If the reranker isn't delivering meaningful lift, that latency isn't being earned. But the fix is a better reranker, not removing the step. A reranker with 3 points of lift running on GPU hardware is costing you 100ms for almost nothing. A domain-matched reranker delivering 17 points for the same 100ms is a completely different calculation.
+
+Evaluate the reranker before deciding whether the latency cost is worth it. Three points on a web-trained model on a legal corpus is not the data you need to make that call.
+
+## The rule that holds this together
+
+Recall@K and precision@N are independent metrics measuring independent things. Check them separately, diagnose which one is the actual problem, then propose a fix for that specific problem.
+
+A small reranker lift on a specialized corpus is diagnostic information, not a conclusion. It tells you the reranker doesn't understand the domain. The response is a domain-matched reranker, not removing the reranking step — which would leave you permanently at the lower precision floor the reranker was already beating.
+
+The teammate is right that 3 points isn't worth the latency cost if the reranker stays as-is. The solution isn't removing the step. It's fixing the reranker.
